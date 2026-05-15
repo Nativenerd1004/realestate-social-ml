@@ -10,7 +10,8 @@
 
 An **autonomous end-to-end machine learning pipeline** that fetches 13 real-world datasets from Kaggle, cleans and processes them with PostgreSQL, trains 9 ML classifiers, auto-retrains with GridSearchCV until performance targets are met, and deploys an interactive multi-module prediction web app.
 
-**Live App →** [realestate-social-ml.pages.dev](https://realestate-social-ml.pages.dev)
+**Live App →** [realestate-social-ml.onrender.com](https://realestate-social-ml.onrender.com)
+**Static Dashboard →** [realestate-social-ml.pages.dev](https://realestate-social-ml.pages.dev)
 **GitHub →** [github.com/Nativenerd1004/realestate-social-ml](https://github.com/Nativenerd1004/realestate-social-ml)
 
 ---
