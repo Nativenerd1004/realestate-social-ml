@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: realestate-social-ml
+    env: python
+    region: oregon
+    plan: free
+    rootDir: webapp
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0

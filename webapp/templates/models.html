@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Model Comparison — RealEstate ML{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Model Comparison</h1>
+  <p>All 9 classifiers evaluated after 10 auto-retrain iterations with GridSearchCV hyperparameter tuning</p>
+</div>
+
+<div class="table-card">
+  <table class="model-table">
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Accuracy</th>
+        <th>Precision</th>
+        <th>Recall</th>
+        <th>F1 Score</th>
+        <th>ROC-AUC</th>
+        <th>Rank</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i, r in enumerate(results) %}
+      <tr class="{% if i == 0 %}row-best{% endif %}">
+        <td class="model-name">
+          {% if i == 0 %}<span class="badge-best">★ Best</span>{% endif %}
+          {{ r.model }}
+        </td>
+        <td><div class="bar-cell"><div class="bar-fill" style="width:{{ (r.accuracy*100)|int }}%"></div><span>{{ "%.1f"|format(r.accuracy*100) }}%</span></div></td>
+        <td><div class="bar-cell"><div class="bar-fill prec" style="width:{{ (r.precision*100)|int }}%"></div><span>{{ "%.1f"|format(r.precision*100) }}%</span></div></td>
+        <td><div class="bar-cell"><div class="bar-fill rec" style="width:{{ (r.recall*100)|int }}%"></div><span>{{ "%.1f"|format(r.recall*100) }}%</span></div></td>
+        <td><div class="bar-cell"><div class="bar-fill f1" style="width:{{ (r.f1*100)|int }}%"></div><span>{{ "%.4f"|format(r.f1) }}</span></div></td>
+        <td><div class="bar-cell"><div class="bar-fill roc" style="width:{{ (r.roc_auc*100)|int }}%"></div><span>{{ "%.4f"|format(r.roc_auc) }}</span></div></td>
+        <td class="rank-cell">{{ "#%d"|format(i+1) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="model-notes">
+  <div class="note-card">
+    <h3>Why Random Forest Won</h3>
+    <p>Random Forest achieved the highest precision (87.3%) and ROC-AUC (0.85), making it the most reliable model for identifying true churn cases while minimising false positives — critical for a business use case where wrongly flagging an active host is costly.</p>
+  </div>
+  <div class="note-card">
+    <h3>F1 Score Context</h3>
+    <p>F1 scores in the 0.59 range reflect significant class imbalance — churned hosts are a minority. The next iteration will apply SMOTE oversampling and a more focused churn dataset to push F1 towards the 0.90 target.</p>
+  </div>
+  <div class="note-card">
+    <h3>Hyperparameter Tuning</h3>
+    <p>Each of the 10 retrain iterations applied GridSearchCV with 3-fold StratifiedKFold cross-validation. Progressive parameter grids were used — broader search in early iterations, finer tuning in later ones.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block head %}
+<script>
+  // Make enumerate available in Jinja
+</script>
+{% endblock %}

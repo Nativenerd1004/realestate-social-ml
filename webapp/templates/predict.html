@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Predict Churn — RealEstate ML{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Host Churn Predictor</h1>
+  <p>Enter listing details below — our Random Forest model (ROC-AUC: 0.85) predicts whether a host is at risk of becoming inactive.</p>
+</div>
+
+<div class="predict-layout">
+  <!-- Input Form -->
+  <div class="predict-form-card">
+    <h2 class="card-title">Listing Details</h2>
+    <form id="predict-form">
+
+      <div class="form-section">
+        <div class="form-section-title">💰 Pricing &amp; Availability</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price per Night ($)</label>
+            <input type="number" id="price" value="155" min="5" max="5000" step="1"/>
+            <span class="form-hint">Median: $155</span>
+          </div>
+          <div class="form-group">
+            <label>Availability (days/year)</label>
+            <input type="range" id="availability_365" value="202" min="0" max="365" step="1"
+                   oninput="document.getElementById('avail-val').textContent=this.value"/>
+            <span class="range-val"><span id="avail-val">202</span> days</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Minimum Nights Required</label>
+            <input type="number" id="minimum_nights" value="14" min="1" max="365" step="1"/>
+          </div>
+          <div class="form-group">
+            <label>Room Type</label>
+            <select id="room_type">
+              <option value="0">Entire Home / Apt</option>
+              <option value="1">Private Room</option>
+              <option value="2">Shared Room</option>
+              <option value="3">Hotel Room</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">⭐ Reviews &amp; Ratings</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Number of Reviews</label>
+            <input type="number" id="number_of_reviews" value="6" min="0" max="3000" step="1"/>
+          </div>
+          <div class="form-group">
+            <label>Review Score Rating</label>
+            <input type="range" id="review_scores_rating" value="4.9" min="0" max="5" step="0.1"
+                   oninput="document.getElementById('rating-val').textContent=this.value"/>
+            <span class="range-val"><span id="rating-val">4.9</span> / 5.0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🏡 Property Details</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Accommodates (guests)</label>
+            <input type="number" id="accommodates" value="3" min="1" max="16" step="1"/>
+          </div>
+          <div class="form-group">
+            <label>Bedrooms</label>
+            <input type="number" id="bedrooms" value="1" min="0" max="10" step="1"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Beds</label>
+            <input type="number" id="beds" value="2" min="0" max="20" step="1"/>
+          </div>
+          <div class="form-group">
+            <label>Bathrooms</label>
+            <input type="number" id="bathrooms" value="1" min="0" max="10" step="0.5"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">👤 Host Profile</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Host Response Rate (%)</label>
+            <input type="range" id="host_response_rate" value="100" min="0" max="100" step="1"
+                   oninput="document.getElementById('resp-val').textContent=this.value"/>
+            <span class="range-val"><span id="resp-val">100</span>%</span>
+          </div>
+          <div class="form-group">
+            <label>Host Response Time</label>
+            <select id="host_response_time">
+              <option value="3">Within an hour</option>
+              <option value="2">Within a few hours</option>
+              <option value="1">Within a day</option>
+              <option value="0">A few days or more</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Superhost Status</label>
+            <select id="host_is_superhost">
+              <option value="0">Not a Superhost</option>
+              <option value="1">Superhost ⭐</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full">
+        <span id="btn-text">Run Prediction →</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Result Panel -->
+  <div class="predict-result-card" id="result-panel" style="display:none;">
+    <h2 class="card-title">Prediction Result</h2>
+
+    <div class="gauge-container">
+      <div class="gauge-ring" id="gauge-ring">
+        <div class="gauge-inner">
+          <div class="gauge-pct" id="gauge-pct">—</div>
+          <div class="gauge-lbl">Churn Risk</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="result-label" id="result-label">—</div>
+    <div class="result-bar-wrap">
+      <div class="result-bar" id="result-bar"></div>
+    </div>
+
+    <div class="top-features">
+      <div class="feat-title">Top Contributing Factors</div>
+      <div id="feature-list"></div>
+    </div>
+
+    <div class="result-note">
+      <strong>Model:</strong> Random Forest Classifier (iter 10) ·
+      <strong>Accuracy:</strong> 84.1% · <strong>ROC-AUC:</strong> 0.85
+    </div>
+
+    <button class="btn btn-outline btn-full" onclick="resetForm()">← Try Another</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/predict.js') }}"></script>
+{% endblock %}

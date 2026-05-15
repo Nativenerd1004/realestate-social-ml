@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}About — RealEstate ML{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>About This Project</h1>
+  <p>An autonomous end-to-end ML pipeline built by Uche Samuel Madumere</p>
+</div>
+
+<div class="about-grid">
+  <div class="about-bio">
+    <div class="bio-card">
+      <div class="bio-avatar">NS</div>
+      <h2>Uche Samuel Madumere</h2>
+      <p class="bio-handle">@Nativenerd1004</p>
+      <p>Nigerian data scientist, designer, and entrepreneur based in Mississauga, Canada. This project was built as part of a portfolio of autonomous ML pipelines demonstrating end-to-end machine learning capability.</p>
+      <a href="https://github.com/Nativenerd1004/realestate-social-ml" class="btn btn-outline" target="_blank">View on GitHub</a>
+    </div>
+  </div>
+
+  <div class="about-details">
+    <div class="detail-card">
+      <h3>Tech Stack</h3>
+      <div class="tech-tags">
+        <span class="tag">Python 3.11</span>
+        <span class="tag">scikit-learn</span>
+        <span class="tag">XGBoost</span>
+        <span class="tag">Flask</span>
+        <span class="tag">PostgreSQL 18</span>
+        <span class="tag">Plotly</span>
+        <span class="tag">kagglehub</span>
+        <span class="tag">SQLAlchemy</span>
+        <span class="tag">pandas</span>
+        <span class="tag">numpy</span>
+        <span class="tag">joblib</span>
+        <span class="tag">Cloudflare Pages</span>
+        <span class="tag">Render.com</span>
+        <span class="tag">GitHub Actions</span>
+        <span class="tag">conda</span>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <h3>Pipeline Summary</h3>
+      <ul class="summary-list">
+        <li>13 Kaggle datasets fetched automatically via kagglehub API</li>
+        <li>45,533 LA Airbnb listing records — primary training dataset</li>
+        <li>9 classifiers trained with 80/20 stratified split</li>
+        <li>10 auto-retrain iterations with GridSearchCV</li>
+        <li>Best model: Random Forest — Accuracy 84.1%, ROC-AUC 0.85</li>
+        <li>MinMaxScaler feature normalization across 23 features</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title">Datasets Used</h2>
+  <div class="table-card">
+    <table class="dataset-table">
+      <thead>
+        <tr><th>#</th><th>Dataset</th><th>Source</th><th>Size</th><th>Role</th></tr>
+      </thead>
+      <tbody>
+        {% for i, d in enumerate(datasets) %}
+        <tr class="{% if 'Primary' in d.name %}row-best{% endif %}">
+          <td>{{ i+1 }}</td>
+          <td class="model-name">{{ d.name }}</td>
+          <td><code>{{ d.ref }}</code></td>
+          <td>{{ d.rows }}</td>
+          <td>{{ d.note }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

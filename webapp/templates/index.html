@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Home — RealEstate ML{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">🤖 Autonomous ML Pipeline</div>
+    <h1 class="hero-title">Real Estate &amp; Social Media<br><span class="accent">Churn Prediction</span></h1>
+    <p class="hero-sub">
+      An end-to-end autonomous machine learning system that fetches real datasets from Kaggle,
+      cleans and engineers features, trains 9 ML models, auto-retrains until performance targets are met,
+      and deploys an interactive prediction dashboard — all in a single pipeline.
+    </p>
+    <div class="hero-actions">
+      <a href="/predict" class="btn btn-primary">Try the Predictor →</a>
+      <a href="/dashboard" class="btn btn-outline">View Dashboard</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-card"><div class="stat-num">13</div><div class="stat-label">Datasets</div></div>
+    <div class="stat-card"><div class="stat-num">45K+</div><div class="stat-label">Records</div></div>
+    <div class="stat-card"><div class="stat-num">9</div><div class="stat-label">ML Models</div></div>
+    <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">Retrain Iters</div></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">STAR Method</h2>
+  <div class="star-grid">
+    <div class="star-card">
+      <div class="star-letter">S</div>
+      <div class="star-label">Situation</div>
+      <p>Real estate platforms face high host churn, where property owners become inactive and stop listing — reducing inventory and platform revenue. Social media engagement patterns can signal early churn indicators.</p>
+    </div>
+    <div class="star-card">
+      <div class="star-letter">T</div>
+      <div class="star-label">Task</div>
+      <p>Build an autonomous ML pipeline that ingests real-world datasets from Kaggle, cleans and processes the data with PostgreSQL, trains 9 classification models, and auto-retrains until F1 and ROC-AUC targets are reached.</p>
+    </div>
+    <div class="star-card">
+      <div class="star-letter">A</div>
+      <div class="star-label">Action</div>
+      <p>Developed a 10-step Python agent: Kaggle fetch → PostgreSQL load → data cleaning → feature engineering → model training (RF, XGB, GBM, LR, DT, SVC, KNN, NB, AdaBoost) → evaluation → auto-retrain loop → dashboard → deploy.</p>
+    </div>
+    <div class="star-card">
+      <div class="star-letter">R</div>
+      <div class="star-label">Result</div>
+      <p>Best model: Random Forest with 84% accuracy, 87% precision, ROC-AUC of 0.85. Fully deployed to GitHub and Cloudflare Pages. Interactive prediction module allows real-time host churn scoring.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Pipeline Architecture</h2>
+  <div class="pipeline-steps">
+    {% set steps = [
+      ("01", "Kaggle Fetch", "Searches Kaggle API and downloads 13 real-world datasets using kagglehub"),
+      ("02", "PostgreSQL Load", "Loads all CSVs as raw tables into a local PostgreSQL 18 database"),
+      ("03", "Data Clean", "Handles missing values, duplicates, encoding, and infers binary churn target"),
+      ("04", "Feature Engineering", "RandomForest importance ranking, correlation filtering, MinMaxScaler"),
+      ("05", "Train 9 Models", "LR · DT · GB · SVC · XGB · RF · KNN · NB · AdaBoost — 80/20 split"),
+      ("06", "Evaluate", "Confusion matrices, ROC curves, pair plots — full Plotly report"),
+      ("07", "Auto-Retrain", "GridSearchCV tuning loop until F1 ≥ 0.90 and ROC-AUC ≥ 0.90"),
+      ("08", "Notebook Gen", "Auto-generates Jupyter notebook documenting the full pipeline"),
+      ("09", "Dashboard", "Self-contained dark mode Plotly HTML dashboard"),
+      ("10", "Deploy", "GitHub push via gh CLI + Cloudflare Pages via Wrangler"),
+    ] %}
+    {% for num, name, desc in steps %}
+    <div class="pipeline-step">
+      <div class="step-num">{{ num }}</div>
+      <div class="step-info">
+        <div class="step-name">{{ name }}</div>
+        <div class="step-desc">{{ desc }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section cta-section">
+  <h2>Ready to make a prediction?</h2>
+  <p>Enter real estate listing details and our Random Forest model will predict the churn probability instantly.</p>
+  <a href="/predict" class="btn btn-primary btn-lg">Launch Predictor →</a>
+</section>
+{% endblock %}

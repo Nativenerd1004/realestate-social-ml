@@ -1,15 +1,22 @@
 # Python
 __pycache__/
 *.pyc
-*.pkl
 *.egg-info/
 venv/
+.DS_Store
 
 # Secrets — never commit these
 .env
 .kaggle/
 
-# Large data files
+# Large pipeline outputs (not needed in repo)
 datasets/
 cleaned/
 models/
+plots/
+reports/
+notebooks/
+
+# Exception: webapp model files ARE committed (Render.com needs them)
+!webapp/model/best_model.pkl
+!webapp/model/X_train.csv

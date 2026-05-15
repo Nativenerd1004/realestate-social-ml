@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}RealEstate ML{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="nav-brand" href="/">
+    <span class="brand-icon">🏠</span>
+    RealEstate <span class="brand-accent">ML</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a></li>
+    <li><a href="/dashboard" class="{% if request.path == '/dashboard' %}active{% endif %}">Dashboard</a></li>
+    <li><a href="/predict" class="{% if request.path == '/predict' %}active{% endif %}">Predict</a></li>
+    <li><a href="/models" class="{% if request.path == '/models' %}active{% endif %}">Models</a></li>
+    <li><a href="/about" class="{% if request.path == '/about' %}active{% endif %}">About</a></li>
+    <li><a href="https://github.com/Nativenerd1004/realestate-social-ml" target="_blank" class="btn-github">GitHub</a></li>
+  </ul>
+</nav>
+
+<main class="main-content">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <p>Built by <strong>Uche Samuel Madumere</strong> · Real Estate + Social Media ML Pipeline ·
+    <a href="https://github.com/Nativenerd1004/realestate-social-ml" target="_blank">GitHub</a>
+  </p>
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>
