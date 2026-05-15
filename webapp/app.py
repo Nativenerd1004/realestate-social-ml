@@ -13,25 +13,29 @@ from flask import Flask, jsonify, render_template, request
 from sklearn.preprocessing import MinMaxScaler
 
 BASE = Path(__file__).parent
-MODEL_PATH = BASE / "model" / "best_model.pkl"
-DATA_PATH  = BASE / "model" / "X_train.csv"
+MODEL_PATH  = BASE / "model" / "best_model.pkl"
+DATA_PATH   = BASE / "model" / "X_train.csv"
+SCALER_PATH = BASE / "model" / "scaler.pkl"
 
 app = Flask(__name__)
 app.jinja_env.globals.update(enumerate=enumerate)
 
 # ---------------------------------------------------------------------------
-# Load model + fit scaler once at startup
+# Load model + scaler once at startup
+# Scaler was fit on original-scale ml_ready.csv (not the already-scaled X_train)
+# so user inputs in natural units (price=$155, rating=4.9) scale correctly to 0-1
 # ---------------------------------------------------------------------------
-model  = joblib.load(MODEL_PATH)
-X_ref  = pd.read_csv(DATA_PATH)
+model        = joblib.load(MODEL_PATH)
+scaler       = joblib.load(SCALER_PATH)
+X_ref        = pd.read_csv(DATA_PATH)
 FEATURE_COLS = list(X_ref.columns)
 
-# Re-fit scaler on the raw (already-encoded) training data
-scaler = MinMaxScaler()
-scaler.fit(X_ref)
-
-# Medians for non-user-facing features
-MEDIANS = X_ref.median().to_dict()
+# Medians in ORIGINAL scale (from scaler's data_min/max midpoints) — all features
+# must be in natural units before the scaler.transform() call
+MEDIANS = {
+    col: float((scaler.data_min_[i] + scaler.data_max_[i]) / 2)
+    for i, col in enumerate(FEATURE_COLS)
+}
 
 # Model results (final iteration)
 MODEL_RESULTS = [
