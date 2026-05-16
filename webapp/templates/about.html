@@ -4,7 +4,7 @@
 {% block content %}
 <div class="page-header">
   <h1>About This Project</h1>
-  <p>An autonomous end-to-end ML pipeline built by Uche Samuel Madumere</p>
+  <p>An end-to-end ML prediction suite built by Uche Samuel Madumere</p>
 </div>
 
 <div class="about-grid">
@@ -13,7 +13,7 @@
       <div class="bio-avatar">NS</div>
       <h2>Uche Samuel Madumere</h2>
       <p class="bio-handle">@Nativenerd1004</p>
-      <p>Nigerian data scientist, designer, and entrepreneur based in Mississauga, Canada. This project was built as part of a portfolio of autonomous ML pipelines demonstrating end-to-end machine learning capability.</p>
+      <p>Nigerian data scientist, designer, and entrepreneur based in Mississauga, Canada. This project demonstrates an end-to-end ML pipeline covering data acquisition, feature engineering, multi-model training, and interactive deployment across 4 real-world prediction targets.</p>
       <a href="https://github.com/Nativenerd1004/realestate-social-ml" class="btn btn-outline" target="_blank">View on GitHub</a>
     </div>
   </div>
@@ -25,17 +25,15 @@
         <span class="tag">Python 3.11</span>
         <span class="tag">scikit-learn</span>
         <span class="tag">XGBoost</span>
-        <span class="tag">Flask</span>
-        <span class="tag">PostgreSQL 18</span>
+        <span class="tag">imbalanced-learn (SMOTE)</span>
+        <span class="tag">Flask 3</span>
         <span class="tag">Plotly</span>
-        <span class="tag">kagglehub</span>
-        <span class="tag">SQLAlchemy</span>
         <span class="tag">pandas</span>
         <span class="tag">numpy</span>
         <span class="tag">joblib</span>
-        <span class="tag">Cloudflare Pages</span>
+        <span class="tag">Kaggle API</span>
         <span class="tag">Render.com</span>
-        <span class="tag">GitHub Actions</span>
+        <span class="tag">GitHub</span>
         <span class="tag">conda</span>
       </div>
     </div>
@@ -43,12 +41,13 @@
     <div class="detail-card">
       <h3>Pipeline Summary</h3>
       <ul class="summary-list">
-        <li>13 Kaggle datasets fetched automatically via kagglehub API</li>
-        <li>45,533 LA Airbnb listing records — primary training dataset</li>
-        <li>9 classifiers trained with 80/20 stratified split</li>
-        <li>10 auto-retrain iterations with GridSearchCV</li>
-        <li>Best model: Random Forest — Accuracy 84.1%, ROC-AUC 0.85</li>
-        <li>MinMaxScaler feature normalization across 23 features</li>
+        <li>5 real Kaggle datasets — 1.9M+ total training records</li>
+        <li>8 classifiers trained per tab with 80/20 stratified split</li>
+        <li>SMOTE applied to Tab 1 (2.85% minority class → balanced)</li>
+        <li>Best model per tab selected by F1 score — XGBoost wins 3/4</li>
+        <li>Social Media tab: F1=0.8762, ROC-AUC=0.9465 (best in suite)</li>
+        <li>Market Position covers 54 US states + 9 Canadian provinces</li>
+        <li>MinMaxScaler normalization, LabelEncoder for categoricals</li>
       </ul>
     </div>
   </div>
@@ -59,11 +58,11 @@
   <div class="table-card">
     <table class="dataset-table">
       <thead>
-        <tr><th>#</th><th>Dataset</th><th>Source</th><th>Size</th><th>Role</th></tr>
+        <tr><th>#</th><th>Dataset</th><th>Kaggle Ref</th><th>Rows</th><th>Role</th></tr>
       </thead>
       <tbody>
         {% for i, d in enumerate(datasets) %}
-        <tr class="{% if 'Primary' in d.name %}row-best{% endif %}">
+        <tr>
           <td>{{ i+1 }}</td>
           <td class="model-name">{{ d.name }}</td>
           <td><code>{{ d.ref }}</code></td>
@@ -71,6 +70,39 @@
           <td>{{ d.note }}</td>
         </tr>
         {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <h2 class="section-title">Model Results Summary</h2>
+  <div class="table-card">
+    <table class="model-table">
+      <thead>
+        <tr><th>Tab</th><th>Prediction Target</th><th>Best Model</th><th>F1 Score</th><th>ROC-AUC</th><th>Training Rows</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span style="color:#ef4444;">●</span> Tab 1</td>
+          <td>Host Churn Risk</td><td>RandomForest + SMOTE</td>
+          <td><strong>0.7682</strong></td><td>0.8534</td><td>285,000</td>
+        </tr>
+        <tr>
+          <td><span style="color:#a855f7;">●</span> Tab 2</td>
+          <td>Market Position (USA + Canada)</td><td>XGBoost</td>
+          <td><strong>0.7570</strong></td><td>0.8462</td><td>235,695</td>
+        </tr>
+        <tr>
+          <td><span style="color:#22c55e;">●</span> Tab 3</td>
+          <td>Listing Sale (at/above asking)</td><td>XGBoost</td>
+          <td><strong>0.7511</strong></td><td>0.7437</td><td>8,574</td>
+        </tr>
+        <tr class="row-best">
+          <td><span style="color:#06b6d4;">●</span> Tab 4</td>
+          <td>Social Media Engagement</td><td>XGBoost</td>
+          <td><strong>0.8762</strong></td><td>0.9465</td><td>178,399</td>
+        </tr>
       </tbody>
     </table>
   </div>

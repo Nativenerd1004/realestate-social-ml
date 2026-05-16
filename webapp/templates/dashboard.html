@@ -4,29 +4,29 @@
 {% block content %}
 <div class="page-header">
   <h1>Analytics Dashboard</h1>
-  <p>Interactive visualizations generated from the ML pipeline — 45,533 Airbnb listing records</p>
+  <p>Interactive visualizations generated from 4 ML models trained across 1.9M+ real records.</p>
 </div>
 
 <div class="chart-tabs">
-  <button class="tab-btn active" onclick="showChart('target')">Target Distribution</button>
-  <button class="tab-btn" onclick="showChart('features')">Feature Importance</button>
-  <button class="tab-btn" onclick="showChart('models')">Model Comparison</button>
-  <button class="tab-btn" onclick="showChart('roc')">ROC Curves</button>
-  <button class="tab-btn" onclick="showChart('corr')">Correlation Heatmap</button>
+  <button class="tab-btn active" onclick="showChart('models', this)">Model Comparison</button>
+  <button class="tab-btn" onclick="showChart('features', this)">Feature Importance</button>
+  <button class="tab-btn" onclick="showChart('roc', this)">Metrics Radar</button>
+  <button class="tab-btn" onclick="showChart('target', this)">Class Balance</button>
+  <button class="tab-btn" onclick="showChart('corr', this)">Dataset Sizes</button>
 </div>
 
 <div class="chart-container">
-  <div id="chart-target"  class="chart-panel active">
-    <iframe src="{{ url_for('static', filename='charts/target_distribution.html') }}" class="chart-frame"></iframe>
+  <div id="chart-models"  class="chart-panel active">
+    <iframe src="{{ url_for('static', filename='charts/model_comparison.html') }}" class="chart-frame"></iframe>
   </div>
   <div id="chart-features" class="chart-panel">
     <iframe src="{{ url_for('static', filename='charts/feature_importance.html') }}" class="chart-frame"></iframe>
   </div>
-  <div id="chart-models" class="chart-panel">
-    <iframe src="{{ url_for('static', filename='charts/model_comparison.html') }}" class="chart-frame"></iframe>
-  </div>
   <div id="chart-roc" class="chart-panel">
     <iframe src="{{ url_for('static', filename='charts/roc_curves.html') }}" class="chart-frame"></iframe>
+  </div>
+  <div id="chart-target" class="chart-panel">
+    <iframe src="{{ url_for('static', filename='charts/target_distribution.html') }}" class="chart-frame"></iframe>
   </div>
   <div id="chart-corr" class="chart-panel">
     <iframe src="{{ url_for('static', filename='charts/correlation_heatmap.html') }}" class="chart-frame"></iframe>
@@ -35,39 +35,39 @@
 
 <div class="insight-cards">
   <div class="insight-card">
-    <div class="insight-icon">🎯</div>
-    <div class="insight-title">Best Model</div>
-    <div class="insight-value">Random Forest</div>
-    <div class="insight-sub">F1: 0.59 · ROC-AUC: 0.85</div>
+    <div class="insight-icon">🏆</div>
+    <div class="insight-title">Best Overall Model</div>
+    <div class="insight-value">XGBoost</div>
+    <div class="insight-sub">F1: 0.8762 · ROC-AUC: 0.9465 (Social Media Tab)</div>
   </div>
   <div class="insight-card">
     <div class="insight-icon">📊</div>
-    <div class="insight-title">Dataset Size</div>
-    <div class="insight-value">45,533</div>
-    <div class="insight-sub">LA Airbnb host listings</div>
+    <div class="insight-title">Total Training Records</div>
+    <div class="insight-value">1.9M+</div>
+    <div class="insight-sub">Across 5 real Kaggle datasets</div>
   </div>
   <div class="insight-card">
-    <div class="insight-icon">🔁</div>
-    <div class="insight-title">Retrain Iterations</div>
-    <div class="insight-value">10</div>
-    <div class="insight-sub">GridSearchCV tuning each pass</div>
+    <div class="insight-icon">🌍</div>
+    <div class="insight-title">Locations Covered</div>
+    <div class="insight-value">63</div>
+    <div class="insight-sub">54 US states + 9 Canadian provinces</div>
   </div>
   <div class="insight-card">
     <div class="insight-icon">⚙️</div>
-    <div class="insight-title">Features Used</div>
-    <div class="insight-value">23</div>
-    <div class="insight-sub">After importance filtering</div>
+    <div class="insight-title">Prediction Tabs</div>
+    <div class="insight-value">4</div>
+    <div class="insight-sub">Churn · Market Position · Listing · Social Media</div>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-function showChart(name) {
+function showChart(name, btn) {
   document.querySelectorAll('.chart-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('chart-' + name).classList.add('active');
-  event.target.classList.add('active');
+  btn.classList.add('active');
 }
 </script>
 {% endblock %}
