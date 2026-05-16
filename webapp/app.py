@@ -148,8 +148,8 @@ def about():
     datasets = [
         {"name": "Real Estate Analytics + Churn",   "ref": "real-estate-analytics-revenue-behavior-and-churn", "rows": "~285k",  "note": "Primary — churn labels, listings, transactions"},
         {"name": "US Airbnb Open Data 2020/2023",    "ref": "us-airbnb-open-data",                              "rows": "459,667","note": "Host behaviour over time"},
-        {"name": "Social Media Advertising Dataset",  "ref": "jsonk11/social-media-advertising-dataset",         "rows": "300,000","note": "Tab 2 — Campaign conversion rates across Instagram, Facebook, Pinterest, Twitter"},
-        {"name": "Illinois Real Estate Sold 2026",   "ref": "kanchana1990/illinois-real-estate-sold-properties-data-2026","rows": "8,588","note": "Tab 3 — Sold-to-list ratio prediction (sold at/above asking price)"},
+        {"name": "USA Real Estate Dataset",            "ref": "ahmedshahriarsakib/usa-real-estate-dataset",         "rows": "1,471,301","note": "Tab 2 — Property market position (above/below state median price)"},
+        {"name": "Illinois Real Estate Sold 2026",   "ref": "kanchana1990/illinois-real-estate-sold-properties-data-2026","rows": "8,574","note": "Tab 3 — Sold-to-list ratio prediction (sold at/above asking price)"},
         {"name": "Southern States Zillow Data",      "ref": "alaasweed/southern-states-zillow-data",             "rows": "5,904", "note": "Reference market data"},
         {"name": "King County House Sales",          "ref": "feeldidaxie/king-county-house-sales-usa",           "rows": "22,687","note": "Reference — US house price benchmarks"},
     ]
