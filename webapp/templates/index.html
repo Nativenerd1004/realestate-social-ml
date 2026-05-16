@@ -81,15 +81,15 @@
   <div class="pipeline-steps">
     {% set steps = [
       ("01", "Kaggle Fetch",        "Kaggle REST API with Bearer token — downloads real datasets into date-stamped folders"),
-      ("02", "Data Cleaning",       "Outlier removal, dtype casting, null imputation, duplicate filtering per dataset"),
-      ("03", "Feature Engineering", "Label encoding for categoricals, population-based area type, log transforms"),
-      ("04", "Class Balancing",     "SMOTE applied to Tab 1 (Host Churn) to fix 2.85% minority class imbalance"),
-      ("05", "Train 8 Models",      "LR · DT · GBM · XGB · RF · KNN · NB · AdaBoost — 80/20 stratified split"),
-      ("06", "Model Selection",     "Best model per tab selected by F1 score — XGBoost wins 3 of 4 tabs"),
-      ("07", "Serialization",       "joblib.dump compress=3 — model, scaler, features, encoder JSON per tab"),
-      ("08", "Flask API",           "4 prediction routes, encoder dropdown data served at startup"),
+      ("02", "PostgreSQL Load",     "Loads all CSVs as raw tables into a local PostgreSQL 18 database via SQLAlchemy"),
+      ("03", "Data Cleaning",       "Outlier removal, dtype casting, null imputation, duplicate filtering per dataset"),
+      ("04", "Feature Engineering", "Label encoding for categoricals, population-based area type, log transforms"),
+      ("05", "Class Balancing",     "SMOTE applied to Tab 1 (Host Churn) to fix 2.85% minority class imbalance"),
+      ("06", "Train 8 Models",      "LR · DT · GBM · XGB · RF · KNN · NB · AdaBoost — 80/20 stratified split"),
+      ("07", "Model Selection",     "Best model per tab selected by F1 score — XGBoost wins 3 of 4 tabs"),
+      ("08", "Serialization",       "joblib.dump compress=3 — model, scaler, features, encoder JSON per tab"),
       ("09", "Dashboard Charts",    "Plotly dark-mode charts — model comparison, feature importance, radar"),
-      ("10", "Deploy",              "GitHub push → Render.com auto-deploys on every commit"),
+      ("10", "Deploy",              "GitHub push → Cloudflare Pages (pipeline output) + Render.com (web app)"),
     ] %}
     {% for num, name, desc in steps %}
     <div class="pipeline-step">

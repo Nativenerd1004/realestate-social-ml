@@ -27,11 +27,14 @@
         <span class="tag">XGBoost</span>
         <span class="tag">imbalanced-learn (SMOTE)</span>
         <span class="tag">Flask 3</span>
+        <span class="tag">PostgreSQL 18</span>
+        <span class="tag">SQLAlchemy</span>
         <span class="tag">Plotly</span>
         <span class="tag">pandas</span>
         <span class="tag">numpy</span>
         <span class="tag">joblib</span>
         <span class="tag">Kaggle API</span>
+        <span class="tag">Cloudflare Pages</span>
         <span class="tag">Render.com</span>
         <span class="tag">GitHub</span>
         <span class="tag">conda</span>
@@ -42,12 +45,13 @@
       <h3>Pipeline Summary</h3>
       <ul class="summary-list">
         <li>5 real Kaggle datasets — 1.9M+ total training records</li>
+        <li>Datasets loaded into PostgreSQL 18 via SQLAlchemy for processing</li>
         <li>8 classifiers trained per tab with 80/20 stratified split</li>
         <li>SMOTE applied to Tab 1 (2.85% minority class → balanced)</li>
         <li>Best model per tab selected by F1 score — XGBoost wins 3/4</li>
         <li>Social Media tab: F1=0.8762, ROC-AUC=0.9465 (best in suite)</li>
         <li>Market Position covers 54 US states + 9 Canadian provinces</li>
-        <li>MinMaxScaler normalization, LabelEncoder for categoricals</li>
+        <li>Deployed to Cloudflare Pages (pipeline) + Render.com (web app)</li>
       </ul>
     </div>
   </div>
