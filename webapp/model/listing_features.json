@@ -1,1 +1,1 @@
-["prop_type_enc", "size_sqm", "bedrooms", "bathrooms", "year_built", "location_score", "amenities_count", "list_price", "has_parking", "near_transit", "near_school", "list_channel_enc", "city_enc", "listed_price"]
+["type_enc", "sub_type_enc", "listPrice", "sqft", "lot_sqft", "stories", "beds", "baths", "baths_full", "garage", "year_built", "price_per_sqft_sold", "property_age_at_sale"]

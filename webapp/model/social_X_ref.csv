@@ -1,2 +1,2 @@
-account_type_enc,media_type_enc,content_category_enc,traffic_source_enc,follower_count,has_call_to_action,post_hour,day_enc,caption_length,hashtags_count
-0,2,8,3,3551,1,6,2,100,7
+bed,bath,acre_lot,house_size,area_enc,state_enc
+3.0,2.0,0.46,1344.0,1.0,9.0

@@ -105,42 +105,37 @@ document.getElementById('churn-form').addEventListener('submit', async (e) => {
   }, 'churn-btn-text', 'Predict Churn Risk →');
 });
 
-// ── TAB 2: Social Media ──────────────────────────────────────────────────────
+// ── TAB 2: Market Position ───────────────────────────────────────────────────
 document.getElementById('social-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const g = id => parseFloat(document.getElementById('s-' + id)?.value ?? 0);
   await runPredict('/predict/social', 'social', {
-    account_type_enc:     g('account_type_enc'),
-    media_type_enc:       g('media_type_enc'),
-    content_category_enc: g('content_category_enc'),
-    traffic_source_enc:   g('traffic_source_enc'),
-    follower_count:       g('follower_count'),
-    has_call_to_action:   g('has_call_to_action'),
-    post_hour:            g('post_hour'),
-    day_enc:              g('day_enc'),
-    caption_length:       g('caption_length'),
-    hashtags_count:       g('hashtags_count'),
-  }, 'social-btn-text', 'Predict Performance →');
+    state_enc:  g('state_enc'),
+    area_enc:   g('area_enc'),
+    bed:        g('bed'),
+    bath:       g('bath'),
+    house_size: g('house_size'),
+    acre_lot:   g('acre_lot'),
+  }, 'social-btn-text', 'Predict Market Position →');
 });
 
-// ── TAB 3: Listing Sale ──────────────────────────────────────────────────────
+// ── TAB 3: Listing Sale (Illinois 2026) ──────────────────────────────────────
 document.getElementById('listing-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const g = id => parseFloat(document.getElementById('l-' + id)?.value ?? 0);
   await runPredict('/predict/listing', 'listing', {
-    prop_type_enc:    g('prop_type_enc'),
-    size_sqm:         g('size_sqm'),
-    bedrooms:         g('bedrooms'),
-    bathrooms:        g('bathrooms'),
-    year_built:       g('year_built'),
-    location_score:   g('location_score'),
-    amenities_count:  g('amenities_count'),
-    list_price:       g('list_price'),
-    has_parking:      g('has_parking'),
-    near_transit:     g('near_transit'),
-    near_school:      g('near_school'),
-    list_channel_enc: g('list_channel_enc'),
-    city_enc:         g('city_enc'),
-    listed_price:     g('listed_price'),
-  }, 'listing-btn-text', 'Predict Sale Likelihood →');
+    type_enc:             g('type_enc'),
+    sub_type_enc:         g('sub_type_enc'),
+    listPrice:            g('listPrice'),
+    sqft:                 g('sqft'),
+    lot_sqft:             g('lot_sqft'),
+    stories:              g('stories'),
+    beds:                 g('beds'),
+    baths:                g('baths'),
+    baths_full:           g('baths_full'),
+    garage:               g('garage'),
+    year_built:           g('year_built'),
+    price_per_sqft_sold:  g('price_per_sqft_sold'),
+    property_age_at_sale: g('property_age_at_sale'),
+  }, 'listing-btn-text', 'Predict Sale Outcome →');
 });

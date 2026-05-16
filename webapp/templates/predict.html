@@ -13,7 +13,7 @@
     <span class="ptab-icon">👤</span> Host Churn Predictor
   </button>
   <button class="ptab-btn" onclick="switchTab('social', this)">
-    <span class="ptab-icon">📱</span> Social Media Performance
+    <span class="ptab-icon">📊</span> Market Position
   </button>
   <button class="ptab-btn" onclick="switchTab('listing', this)">
     <span class="ptab-icon">🏠</span> Listing Sale Predictor
@@ -172,118 +172,77 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!-- TAB 2: SOCIAL MEDIA PERFORMANCE PREDICTOR                              -->
+<!-- TAB 2: PROPERTY MARKET POSITION PREDICTOR                              -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <div id="tab-social" class="predict-tab-content">
   <div class="tab-intro">
-    <div class="tab-badge social-badge">Social Media Model</div>
-    <p class="tab-desc">Enter your content parameters — the model predicts whether your post will achieve <strong>high engagement</strong>, which translates to more reach, leads, and inbound calls for real estate listings.</p>
+    <div class="tab-badge social-badge">Market Position Model</div>
+    <p class="tab-desc">Enter property specs — the model predicts whether this property is priced <strong>above or below the state market median</strong>. Trained on 200k real US listings across all states. Helps agents position listings competitively.</p>
   </div>
   <div class="predict-layout">
     <div class="predict-form-card">
-      <h2 class="card-title">Content Details</h2>
+      <h2 class="card-title">Property Specs</h2>
       <form id="social-form">
 
         <div class="form-section">
-          <div class="form-section-title">📱 Account & Platform</div>
+          <div class="form-section-title">📍 Location</div>
           <div class="form-row">
             <div class="form-group">
-              <label>Account Type</label>
-              <select id="s-account_type_enc">
-                {% for i, at in enumerate(social_enc['account_types']) %}
+              <label>State</label>
+              <select id="s-state_enc">
+                {% for i, st in enumerate(social_enc['states']) %}
+                <option value="{{ i }}">{{ st }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Area Type</label>
+              <select id="s-area_enc">
+                {% for i, at in enumerate(social_enc['area_types']) %}
                 <option value="{{ i }}">{{ at | title }}</option>
                 {% endfor %}
               </select>
             </div>
-            <div class="form-group">
-              <label>Follower Count</label>
-              <input type="number" id="s-follower_count" value="5000" min="100" max="10000000"/>
-            </div>
           </div>
         </div>
 
         <div class="form-section">
-          <div class="form-section-title">🎬 Content Type</div>
+          <div class="form-section-title">🏠 Property Details</div>
           <div class="form-row">
             <div class="form-group">
-              <label>Media Type</label>
-              <select id="s-media_type_enc">
-                {% for i, mt in enumerate(social_enc['media_types']) %}
-                <option value="{{ i }}">{{ mt | title }}</option>
-                {% endfor %}
-              </select>
+              <label>Bedrooms</label>
+              <input type="number" id="s-bed" value="3" min="1" max="15"/>
             </div>
             <div class="form-group">
-              <label>Content Category</label>
-              <select id="s-content_category_enc">
-                {% for i, cc in enumerate(social_enc['content_cats']) %}
-                <option value="{{ i }}">{{ cc }}</option>
-                {% endfor %}
-              </select>
+              <label>Bathrooms</label>
+              <input type="number" id="s-bath" value="2" min="1" max="15"/>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Traffic Source</label>
-              <select id="s-traffic_source_enc">
-                {% for i, ts in enumerate(social_enc['traffic_sources']) %}
-                <option value="{{ i }}">{{ ts }}</option>
-                {% endfor %}
-              </select>
+              <label>House Size (sq ft)</label>
+              <input type="number" id="s-house_size" value="1800" min="200" max="20000"/>
             </div>
             <div class="form-group">
-              <label>Has Call to Action?</label>
-              <select id="s-has_call_to_action">
-                <option value="1">Yes — CTA included</option>
-                <option value="0">No CTA</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">🕐 Timing & Caption</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Day of Week</label>
-              <select id="s-day_enc">
-                {% for i, day in enumerate(social_enc['days']) %}
-                <option value="{{ i }}">{{ day }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Post Hour (0–23)</label>
-              <input type="range" id="s-post_hour" value="10" min="0" max="23" step="1"
-                     oninput="document.getElementById('hour-val').textContent=this.value+':00'"/>
-              <span class="range-val"><span id="hour-val">10:00</span></span>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Caption Length (characters)</label>
-              <input type="number" id="s-caption_length" value="150" min="0" max="2200"/>
-            </div>
-            <div class="form-group">
-              <label>Hashtag Count</label>
-              <input type="number" id="s-hashtags_count" value="10" min="0" max="30"/>
+              <label>Lot Size (acres)</label>
+              <input type="number" id="s-acre_lot" value="0.25" min="0" max="50" step="0.01"/>
             </div>
           </div>
         </div>
 
         <button type="submit" class="btn btn-primary btn-full" style="background:#a855f7; color:#fff;">
-          <span id="social-btn-text">Predict Performance →</span>
+          <span id="social-btn-text">Predict Market Position →</span>
         </button>
       </form>
     </div>
 
     <div class="predict-result-card" id="social-result" style="display:none;">
-      <h2 class="card-title">Performance Prediction</h2>
+      <h2 class="card-title">Market Position Result</h2>
       <div class="gauge-container">
         <div class="gauge-ring" id="social-gauge-ring">
           <div class="gauge-inner">
             <div class="gauge-pct" id="social-gauge-pct">—</div>
-            <div class="gauge-lbl">Lead Potential</div>
+            <div class="gauge-lbl">Above Market</div>
           </div>
         </div>
       </div>
@@ -305,122 +264,101 @@
 <div id="tab-listing" class="predict-tab-content">
   <div class="tab-intro">
     <div class="tab-badge listing-badge">Listing Performance Model</div>
-    <p class="tab-desc">Enter property and listing details to predict the likelihood of a successful sale. Trained on 8,500 real estate transactions across multiple cities.</p>
+    <p class="tab-desc">Enter property and listing details to predict whether the property will <strong>sell at or above asking price</strong>. Trained on 8,574 real Illinois property sales from 2026.</p>
   </div>
   <div class="predict-layout">
     <div class="predict-form-card">
-      <h2 class="card-title">Property Details</h2>
+      <h2 class="card-title">Listing Details</h2>
       <form id="listing-form">
 
         <div class="form-section">
-          <div class="form-section-title">🏗️ Property Specs</div>
+          <div class="form-section-title">🏗️ Property Type</div>
           <div class="form-row">
             <div class="form-group">
               <label>Property Type</label>
-              <select id="l-prop_type_enc">
+              <select id="l-type_enc">
                 {% for i, pt in enumerate(listing_enc['property_types']) %}
                 <option value="{{ i }}">{{ pt }}</option>
                 {% endfor %}
               </select>
             </div>
             <div class="form-group">
-              <label>Size (sqm)</label>
-              <input type="number" id="l-size_sqm" value="120" min="10" max="2000"/>
+              <label>Sub Type</label>
+              <select id="l-sub_type_enc">
+                {% for i, st in enumerate(listing_enc['sub_types']) %}
+                <option value="{{ i }}">{{ st if st else '(none)' }}</option>
+                {% endfor %}
+              </select>
             </div>
           </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">🛏️ Rooms & Structure</div>
           <div class="form-row">
             <div class="form-group">
               <label>Bedrooms</label>
-              <input type="number" id="l-bedrooms" value="3" min="0" max="20"/>
+              <input type="number" id="l-beds" value="3" min="0" max="20"/>
             </div>
             <div class="form-group">
               <label>Bathrooms</label>
-              <input type="number" id="l-bathrooms" value="2" min="0" max="10"/>
+              <input type="number" id="l-baths" value="2" min="0" max="10" step="0.5"/>
             </div>
           </div>
           <div class="form-row">
+            <div class="form-group">
+              <label>Full Bathrooms</label>
+              <input type="number" id="l-baths_full" value="2" min="0" max="10"/>
+            </div>
+            <div class="form-group">
+              <label>Garage Spaces</label>
+              <input type="number" id="l-garage" value="1" min="0" max="10"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Stories</label>
+              <input type="number" id="l-stories" value="1" min="1" max="10"/>
+            </div>
             <div class="form-group">
               <label>Year Built</label>
-              <input type="number" id="l-year_built" value="2005" min="1900" max="2025"/>
-            </div>
-            <div class="form-group">
-              <label>Amenities Count</label>
-              <input type="number" id="l-amenities_count" value="5" min="0" max="20"/>
+              <input type="number" id="l-year_built" value="1995" min="1800" max="2025"/>
             </div>
           </div>
         </div>
 
         <div class="form-section">
-          <div class="form-section-title">📍 Location & Market</div>
+          <div class="form-section-title">📐 Size & Pricing</div>
           <div class="form-row">
             <div class="form-group">
-              <label>Location Score (0–1)</label>
-              <input type="range" id="l-location_score" value="0.65" min="0" max="1" step="0.01"
-                     oninput="document.getElementById('loc-val').textContent=this.value"/>
-              <span class="range-val"><span id="loc-val">0.65</span></span>
+              <label>Living Area (sqft)</label>
+              <input type="number" id="l-sqft" value="1800" min="100" max="20000"/>
             </div>
             <div class="form-group">
-              <label>City</label>
-              <select id="l-city_enc">
-                {% for i, city in enumerate(listing_enc['cities']) %}
-                <option value="{{ i }}">{{ city }}</option>
-                {% endfor %}
-              </select>
+              <label>Lot Size (sqft)</label>
+              <input type="number" id="l-lot_sqft" value="8000" min="0" max="500000"/>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Has Parking?</label>
-              <select id="l-has_parking">
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </select>
+              <label>List Price ($)</label>
+              <input type="number" id="l-listPrice" value="299000" min="10000" max="10000000"/>
             </div>
             <div class="form-group">
-              <label>Near Transit?</label>
-              <select id="l-near_transit">
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </select>
+              <label>Price Per Sqft Sold ($)</label>
+              <input type="number" id="l-price_per_sqft_sold" value="165" min="10" max="2000"/>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Near School?</label>
-              <select id="l-near_school">
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">💰 Pricing & Listing</div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Property Value ($)</label>
-              <input type="number" id="l-list_price" value="500000" min="50000" max="50000000"/>
-            </div>
-            <div class="form-group">
-              <label>Listed Price ($)</label>
-              <input type="number" id="l-listed_price" value="480000" min="50000" max="50000000"/>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Listing Channel</label>
-              <select id="l-list_channel_enc">
-                {% for i, lc in enumerate(listing_enc['list_channels']) %}
-                <option value="{{ i }}">{{ lc }}</option>
-                {% endfor %}
-              </select>
+              <label>Property Age at Sale (yrs)</label>
+              <input type="number" id="l-property_age_at_sale" value="29" min="0" max="200"/>
             </div>
           </div>
         </div>
 
         <button type="submit" class="btn btn-primary btn-full" style="background:#22c55e; color:#0d1117;">
-          <span id="listing-btn-text">Predict Sale Likelihood →</span>
+          <span id="listing-btn-text">Predict Sale Outcome →</span>
         </button>
       </form>
     </div>
@@ -431,7 +369,7 @@
         <div class="gauge-ring" id="listing-gauge-ring">
           <div class="gauge-inner">
             <div class="gauge-pct" id="listing-gauge-pct">—</div>
-            <div class="gauge-lbl">Sale Probability</div>
+            <div class="gauge-lbl">At/Above Asking</div>
           </div>
         </div>
       </div>

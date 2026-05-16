@@ -40,16 +40,12 @@ CHURN_ENC   = {
     "income_bands": json.loads((MDL / "churn_income_bands.json").read_text()),
 }
 SOCIAL_ENC  = {
-    "account_types":   json.loads((MDL / "social_account_types.json").read_text()),
-    "media_types":     json.loads((MDL / "social_media_types.json").read_text()),
-    "content_cats":    json.loads((MDL / "social_content_cats.json").read_text()),
-    "traffic_sources": json.loads((MDL / "social_traffic_sources.json").read_text()),
-    "days":            json.loads((MDL / "social_days.json").read_text()),
+    "area_types": json.loads((MDL / "social_area_types.json").read_text()),
+    "states":     json.loads((MDL / "social_states.json").read_text()),
 }
 LISTING_ENC = {
-    "property_types": json.loads((MDL / "listing_property_types.json").read_text()),
-    "list_channels":  json.loads((MDL / "listing_list_channels.json").read_text()),
-    "cities":         json.loads((MDL / "listing_cities.json").read_text()),
+    "property_types": json.loads((MDL / "listing_types.json").read_text()),
+    "sub_types":      json.loads((MDL / "listing_subtypes.json").read_text()),
 }
 
 # ── Combined model results for /models page ────────────────────────────────────
@@ -120,8 +116,8 @@ def predict_social():
         d = request.get_json()
         pred, proba, feats = _predict(social_model, social_scaler, SOCIAL_FEATURES, SOCIAL_MEDS, d)
         pct   = round(proba * 100, 1)
-        label = "High Performance — Likely to Drive Leads" if pred == 1 else "Low Performance — Low Lead Potential"
-        color = "#22c55e" if pred == 1 else "#f59e0b"
+        label = "Above Market — Property Priced Above State Median" if pred == 1 else "Below Market — Property Priced Below State Median"
+        color = "#a855f7" if pred == 1 else "#f59e0b"
         return jsonify({"prediction": pred, "label": label, "color": color,
                         "probability": pct, "top_features": feats})
     except Exception as e:
@@ -134,8 +130,8 @@ def predict_listing():
         d = request.get_json()
         pred, proba, feats = _predict(listing_model, listing_scaler, LISTING_FEATURES, LISTING_MEDS, d)
         pct   = round(proba * 100, 1)
-        label = "Likely to Sell" if pred == 1 else "At Risk of Not Selling"
-        color = "#22c55e" if pred == 1 else "#ef4444"
+        label = "Likely to Sell at or Above Asking Price" if pred == 1 else "Likely to Sell Below Asking Price"
+        color = "#22c55e" if pred == 1 else "#f59e0b"
         return jsonify({"prediction": pred, "label": label, "color": color,
                         "probability": pct, "top_features": feats})
     except Exception as e:
@@ -152,10 +148,10 @@ def about():
     datasets = [
         {"name": "Real Estate Analytics + Churn",   "ref": "real-estate-analytics-revenue-behavior-and-churn", "rows": "~285k",  "note": "Primary — churn labels, listings, transactions"},
         {"name": "US Airbnb Open Data 2020/2023",    "ref": "us-airbnb-open-data",                              "rows": "459,667","note": "Host behaviour over time"},
-        {"name": "Instagram Analytics Dataset",      "ref": "instagram-analytics-dataset",                      "rows": "30,000", "note": "Social media content performance"},
-        {"name": "Social Media Performance",         "ref": "social-media-performance-and-engagement-data",     "rows": "10,000", "note": "Cross-platform engagement signals"},
-        {"name": "Georgia Real Estate 2026",         "ref": "georgia-real-estate-rentals-intelligence-2026",    "rows": "~5k",    "note": "Recent rental market data"},
-        {"name": "Sydney Airbnb Short-Term Rentals", "ref": "airbnb-short-term-rental-data-sydney",             "rows": "~10k",   "note": "International rental benchmark"},
+        {"name": "Social Media Advertising Dataset",  "ref": "jsonk11/social-media-advertising-dataset",         "rows": "300,000","note": "Tab 2 — Campaign conversion rates across Instagram, Facebook, Pinterest, Twitter"},
+        {"name": "Illinois Real Estate Sold 2026",   "ref": "kanchana1990/illinois-real-estate-sold-properties-data-2026","rows": "8,588","note": "Tab 3 — Sold-to-list ratio prediction (sold at/above asking price)"},
+        {"name": "Southern States Zillow Data",      "ref": "alaasweed/southern-states-zillow-data",             "rows": "5,904", "note": "Reference market data"},
+        {"name": "King County House Sales",          "ref": "feeldidaxie/king-county-house-sales-usa",           "rows": "22,687","note": "Reference — US house price benchmarks"},
     ]
     return render_template("about.html", datasets=datasets)
 
