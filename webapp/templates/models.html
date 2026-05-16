@@ -4,59 +4,79 @@
 {% block content %}
 <div class="page-header">
   <h1>Model Comparison</h1>
-  <p>All 9 classifiers evaluated after 10 auto-retrain iterations with GridSearchCV hyperparameter tuning</p>
+  <p>All 9 classifiers trained independently across 3 prediction targets — SMOTE-balanced classes, best model selected per F1 score.</p>
 </div>
 
-<div class="table-card">
-  <table class="model-table">
-    <thead>
-      <tr>
-        <th>Model</th>
-        <th>Accuracy</th>
-        <th>Precision</th>
-        <th>Recall</th>
-        <th>F1 Score</th>
-        <th>ROC-AUC</th>
-        <th>Rank</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for i, r in enumerate(results) %}
-      <tr class="{% if i == 0 %}row-best{% endif %}">
-        <td class="model-name">
-          {% if i == 0 %}<span class="badge-best">★ Best</span>{% endif %}
-          {{ r.model }}
-        </td>
-        <td><div class="bar-cell"><div class="bar-fill" style="width:{{ (r.accuracy*100)|int }}%"></div><span>{{ "%.1f"|format(r.accuracy*100) }}%</span></div></td>
-        <td><div class="bar-cell"><div class="bar-fill prec" style="width:{{ (r.precision*100)|int }}%"></div><span>{{ "%.1f"|format(r.precision*100) }}%</span></div></td>
-        <td><div class="bar-cell"><div class="bar-fill rec" style="width:{{ (r.recall*100)|int }}%"></div><span>{{ "%.1f"|format(r.recall*100) }}%</span></div></td>
-        <td><div class="bar-cell"><div class="bar-fill f1" style="width:{{ (r.f1*100)|int }}%"></div><span>{{ "%.4f"|format(r.f1) }}</span></div></td>
-        <td><div class="bar-cell"><div class="bar-fill roc" style="width:{{ (r.roc_auc*100)|int }}%"></div><span>{{ "%.4f"|format(r.roc_auc) }}</span></div></td>
-        <td class="rank-cell">{{ "#%d"|format(i+1) }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{% set tabs_order = ['Host Churn', 'Social Media', 'Listing Sale'] %}
+{% set tab_colors = {'Host Churn': '#ef4444', 'Social Media': '#a855f7', 'Listing Sale': '#22c55e'} %}
+
+<div class="chart-tabs" style="padding:1.5rem 4rem 0">
+  <button class="tab-btn active" onclick="showModels('churn', this)">👤 Host Churn</button>
+  <button class="tab-btn" onclick="showModels('social', this)">📱 Social Media</button>
+  <button class="tab-btn" onclick="showModels('listing', this)">🏠 Listing Sale</button>
 </div>
+
+{% for tab_name in tabs_order %}
+{% set tab_id = tab_name.lower().split()[0] %}
+{% set tab_results = results | selectattr('tab', 'equalto', tab_name) | list | sort(attribute='f1', reverse=True) %}
+<div id="models-{{ tab_id }}" class="model-group" style="{{ 'display:block' if loop.first else 'display:none' }}">
+  <div class="table-card" style="margin-top:0; border-top:3px solid {{ tab_colors[tab_name] }}">
+    <table class="model-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Model</th>
+          <th>Accuracy</th>
+          <th>Precision</th>
+          <th>Recall</th>
+          <th>F1 Score</th>
+          <th>ROC-AUC</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i, r in enumerate(tab_results) %}
+        <tr class="{% if i == 0 %}row-best{% endif %}">
+          <td class="rank-cell">{{ "#%d"|format(i+1) }}</td>
+          <td class="model-name">
+            {% if i == 0 %}<span class="badge-best">★ Best</span>{% endif %}
+            {{ r.model }}
+          </td>
+          <td><div class="bar-cell"><div class="bar-fill" style="width:{{ (r.accuracy*100)|int }}%"></div><span>{{ "%.1f"|format(r.accuracy*100) }}%</span></div></td>
+          <td><div class="bar-cell"><div class="bar-fill prec" style="width:{{ (r.precision*100)|int }}%"></div><span>{{ "%.1f"|format(r.precision*100) }}%</span></div></td>
+          <td><div class="bar-cell"><div class="bar-fill rec" style="width:{{ (r.recall*100)|int }}%"></div><span>{{ "%.1f"|format(r.recall*100) }}%</span></div></td>
+          <td><div class="bar-cell"><div class="bar-fill f1" style="width:{{ (r.f1*100)|int }}%"></div><span>{{ "%.4f"|format(r.f1) }}</span></div></td>
+          <td><div class="bar-cell"><div class="bar-fill roc" style="width:{{ (r.roc_auc*100)|int }}%"></div><span>{{ "%.4f"|format(r.roc_auc) }}</span></div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endfor %}
 
 <div class="model-notes">
   <div class="note-card">
-    <h3>Why Random Forest Won</h3>
-    <p>Random Forest achieved the highest precision (87.3%) and ROC-AUC (0.85), making it the most reliable model for identifying true churn cases while minimising false positives — critical for a business use case where wrongly flagging an active host is costly.</p>
+    <h3>SMOTE for Class Imbalance</h3>
+    <p>The Host Churn target had only 2.85% positive class — severely skewed. Synthetic Minority Oversampling (SMOTE) was applied before training to balance classes, directly addressing the F1 plateau from the previous iteration that sat at 0.59.</p>
   </div>
   <div class="note-card">
-    <h3>F1 Score Context</h3>
-    <p>F1 scores in the 0.59 range reflect significant class imbalance — churned hosts are a minority. The next iteration will apply SMOTE oversampling and a more focused churn dataset to push F1 towards the 0.90 target.</p>
+    <h3>3 Independent Models</h3>
+    <p>Each prediction tab uses a separately trained model, scaler, and feature set. No shared weights — Host Churn, Social Media Performance, and Listing Sale are fully independent pipelines tailored to their dataset's structure.</p>
   </div>
   <div class="note-card">
-    <h3>Hyperparameter Tuning</h3>
-    <p>Each of the 10 retrain iterations applied GridSearchCV with 3-fold StratifiedKFold cross-validation. Progressive parameter grids were used — broader search in early iterations, finer tuning in later ones.</p>
+    <h3>Why RandomForest Dominates</h3>
+    <p>Random Forest consistently outperforms across all 3 targets due to its ensemble averaging, robustness to feature scale (even after MinMaxScaler), and natural handling of mixed categorical + continuous features without needing further preprocessing.</p>
   </div>
 </div>
 {% endblock %}
 
-{% block head %}
+{% block scripts %}
 <script>
-  // Make enumerate available in Jinja
+function showModels(name, btn) {
+  document.querySelectorAll('.model-group').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.chart-tabs .tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('models-' + name).style.display = 'block';
+  btn.classList.add('active');
+}
 </script>
 {% endblock %}

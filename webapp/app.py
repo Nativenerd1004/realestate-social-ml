@@ -1,6 +1,6 @@
 """
-Real Estate + Social Media ML — Interactive Web App
-Flask backend: Home | Dashboard | Predict | Models | About
+Real Estate + Social Media ML — 3-Tab Prediction App
+Tabs: Host Churn | Social Media Performance | Listing Sale Predictor
 """
 import json
 import os
@@ -10,66 +10,78 @@ import joblib
 import numpy as np
 import pandas as pd
 from flask import Flask, jsonify, render_template, request
-from sklearn.preprocessing import MinMaxScaler
 
-BASE = Path(__file__).parent
-MODEL_PATH  = BASE / "model" / "best_model.pkl"
-DATA_PATH   = BASE / "model" / "X_train.csv"
-SCALER_PATH = BASE / "model" / "scaler.pkl"
+BASE  = Path(__file__).parent
+MDL   = BASE / "model"
 
 app = Flask(__name__)
 app.jinja_env.globals.update(enumerate=enumerate)
 
-# ---------------------------------------------------------------------------
-# Load model + scaler once at startup
-# Scaler was fit on original-scale ml_ready.csv (not the already-scaled X_train)
-# so user inputs in natural units (price=$155, rating=4.9) scale correctly to 0-1
-# ---------------------------------------------------------------------------
-model        = joblib.load(MODEL_PATH)
-scaler       = joblib.load(SCALER_PATH)
-X_ref        = pd.read_csv(DATA_PATH)
-FEATURE_COLS = list(X_ref.columns)
 
-# Medians in ORIGINAL scale (from scaler's data_min/max midpoints) — all features
-# must be in natural units before the scaler.transform() call
-MEDIANS = {
-    col: float((scaler.data_min_[i] + scaler.data_max_[i]) / 2)
-    for i, col in enumerate(FEATURE_COLS)
+def load_model_bundle(name):
+    """Load model, scaler, features, and optional encoder lists for a named bundle."""
+    m   = joblib.load(MDL / f"{name}_model.pkl")
+    sc  = joblib.load(MDL / f"{name}_scaler.pkl")
+    ref = pd.read_csv(MDL / f"{name}_X_ref.csv")
+    ft  = json.loads((MDL / f"{name}_features.json").read_text())
+    med = ref.median().to_dict()
+    return m, sc, ft, med
+
+
+# ── Load all three models at startup ──────────────────────────────────────────
+churn_model,   churn_scaler,   CHURN_FEATURES,   CHURN_MEDS   = load_model_bundle("churn")
+social_model,  social_scaler,  SOCIAL_FEATURES,  SOCIAL_MEDS  = load_model_bundle("social")
+listing_model, listing_scaler, LISTING_FEATURES, LISTING_MEDS = load_model_bundle("listing")
+
+# ── Encoder label lists ────────────────────────────────────────────────────────
+CHURN_ENC   = {
+    "segments":     json.loads((MDL / "churn_segments.json").read_text()),
+    "channels":     json.loads((MDL / "churn_channels.json").read_text()),
+    "income_bands": json.loads((MDL / "churn_income_bands.json").read_text()),
+}
+SOCIAL_ENC  = {
+    "account_types":   json.loads((MDL / "social_account_types.json").read_text()),
+    "media_types":     json.loads((MDL / "social_media_types.json").read_text()),
+    "content_cats":    json.loads((MDL / "social_content_cats.json").read_text()),
+    "traffic_sources": json.loads((MDL / "social_traffic_sources.json").read_text()),
+    "days":            json.loads((MDL / "social_days.json").read_text()),
+}
+LISTING_ENC = {
+    "property_types": json.loads((MDL / "listing_property_types.json").read_text()),
+    "list_channels":  json.loads((MDL / "listing_list_channels.json").read_text()),
+    "cities":         json.loads((MDL / "listing_cities.json").read_text()),
 }
 
-# Model results (final iteration)
-MODEL_RESULTS = [
-    {"model": "Random Forest",        "accuracy": 0.8407, "precision": 0.8733, "recall": 0.4465, "f1": 0.5909, "roc_auc": 0.8485},
-    {"model": "XGBoost",              "accuracy": 0.8268, "precision": 0.7615, "recall": 0.4776, "f1": 0.5871, "roc_auc": 0.8277},
-    {"model": "Decision Tree",        "accuracy": 0.7540, "precision": 0.5215, "recall": 0.5526, "f1": 0.5366, "roc_auc": 0.6883},
-    {"model": "K-Nearest Neighbors",  "accuracy": 0.7780, "precision": 0.5949, "recall": 0.4342, "f1": 0.5020, "roc_auc": 0.7440},
-    {"model": "Gradient Boosting",    "accuracy": 0.7961, "precision": 0.7623, "recall": 0.3034, "f1": 0.4340, "roc_auc": 0.7856},
-    {"model": "Gaussian NB",          "accuracy": 0.7209, "precision": 0.4546, "recall": 0.4159, "f1": 0.4344, "roc_auc": 0.6883},
-    {"model": "AdaBoost",             "accuracy": 0.7857, "precision": 0.6919, "recall": 0.3034, "f1": 0.4218, "roc_auc": 0.7571},
-    {"model": "Logistic Regression",  "accuracy": 0.7655, "precision": 0.6443, "recall": 0.2007, "f1": 0.3060, "roc_auc": 0.7311},
-    {"model": "SVC",                  "accuracy": 0.7691, "precision": 0.7355, "recall": 0.1623, "f1": 0.2660, "roc_auc": 0.7239},
-]
+# ── Combined model results for /models page ────────────────────────────────────
+def _load_scores(name, label):
+    sc = json.loads((MDL / f"{name}_scores.json").read_text())
+    return [{"tab": label, "model": k, **v} for k, v in sc.items()]
 
-DATASETS = [
-    {"name": "ARIMA Time-Series Multi-Industry", "ref": "piyushdave/data-for-various-application-for-arima-and-sarima", "rows": "40 files", "note": "Real estate + social media time-series"},
-    {"name": "Antigua Import/Export Trade",       "ref": "techsalerator/new-events-data-in-antigua-and-barbuda",         "rows": "—",       "note": "Trade data"},
-    {"name": "Sunborn Customer Churn",            "ref": "zsinghrahulk/sunborn-customer-churn",                           "rows": "~100k",   "note": "Primary churn labels source"},
-    {"name": "Nifty 500 Stocks",                  "ref": "yekahaaagayeham/stocks-listed-on-nifty-500-july-2021",          "rows": "500+",    "note": "Indian real estate equity"},
-    {"name": "USA Housing Dataset",               "ref": "arnavgupta1205/usa-housing-dataset",                            "rows": "~5k",     "note": "US property prices"},
-    {"name": "Bengaluru House Prices",            "ref": "sumanbera19/bengaluru-house-price-dataset",                     "rows": "~13k",    "note": "India housing market"},
-    {"name": "Real Estate Price Prediction",      "ref": "quantbruce/real-estate-price-prediction",                       "rows": "~400",    "note": "Taiwan real estate"},
-    {"name": "Housing Price Prediction",          "ref": "abdullahmeo/housing-price-prediction",                          "rows": "~1k",     "note": "General housing"},
-    {"name": "Twitter News Portal Engagement",    "ref": "thedevastator/twitter-news-portal-engagement-on-viral-heboh-ne","rows": "~10k",   "note": "Social media engagement"},
-    {"name": "South Carolina Real Estate 2025",   "ref": "kanchana1990/real-estate-data-south-carolina-2025",             "rows": "~2k",     "note": "Recent US market data"},
-    {"name": "LA Airbnb Listings ★ Primary",     "ref": "oscarbatiz/los-angeles-airbnb-listings",                        "rows": "45,533",  "note": "Primary ML dataset — host churn"},
-    {"name": "Vicidial Real Estate Leads",        "ref": "vicistack/vicidial-real-estate-lead-generation",                "rows": "~5k",     "note": "Lead generation signals"},
-    {"name": "PropertyFinder April 2026",         "ref": "shahidirfan/propertyfinder-sample-dataset-april-2026",          "rows": "~3k",     "note": "Latest market snapshot"},
-]
+ALL_MODEL_RESULTS = (
+    _load_scores("churn",   "Host Churn") +
+    _load_scores("social",  "Social Media") +
+    _load_scores("listing", "Listing Sale")
+)
 
 
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
+def _predict(model, scaler, features, medians, user_map):
+    row = medians.copy()
+    row.update({k: float(v) for k, v in user_map.items() if k in features})
+    X       = pd.DataFrame([row])[features]
+    X_sc    = scaler.transform(X)
+    pred    = int(model.predict(X_sc)[0])
+    proba   = float(model.predict_proba(X_sc)[0][1])
+    try:
+        imps    = model.feature_importances_
+        top_idx = np.argsort(imps)[::-1][:5]
+        top_feats = [{"feature": features[i].replace("_", " ").title(),
+                      "importance": round(float(imps[i]), 4)} for i in top_idx]
+    except AttributeError:
+        top_feats = []
+    return pred, proba, top_feats
+
+
+# ── Routes ─────────────────────────────────────────────────────────────────────
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -80,79 +92,72 @@ def dashboard():
     return render_template("dashboard.html")
 
 
-@app.route("/predict", methods=["GET"])
+@app.route("/predict")
 def predict_page():
-    return render_template("predict.html")
+    return render_template("predict.html",
+                           churn_enc=CHURN_ENC,
+                           social_enc=SOCIAL_ENC,
+                           listing_enc=LISTING_ENC)
 
 
-@app.route("/predict", methods=["POST"])
-def predict_api():
+@app.route("/predict/churn", methods=["POST"])
+def predict_churn():
     try:
-        data = request.get_json()
+        d = request.get_json()
+        pred, proba, feats = _predict(churn_model, churn_scaler, CHURN_FEATURES, CHURN_MEDS, d)
+        pct   = round(proba * 100, 1)
+        label = "High Churn Risk" if pred == 1 else "Low Churn Risk"
+        color = "#ef4444" if pred == 1 else "#22c55e"
+        return jsonify({"prediction": pred, "label": label, "color": color,
+                        "probability": pct, "top_features": feats})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
-        # Build full feature row using medians as base
-        row = MEDIANS.copy()
 
-        # Override with user-provided values (already in original scale)
-        user_map = {
-            "price":              float(data.get("price", 155)),
-            "availability_365":   float(data.get("availability_365", 202)),
-            "minimum_nights":     float(data.get("minimum_nights", 14)),
-            "number_of_reviews":  float(data.get("number_of_reviews", 6)),
-            "review_scores_rating": float(data.get("review_scores_rating", 4.9)),
-            "host_response_rate": float(data.get("host_response_rate", 1.0)),
-            "accommodates":       float(data.get("accommodates", 3)),
-            "beds":               float(data.get("beds", 2)),
-            "bedrooms":           float(data.get("bedrooms", 1)),
-            "bathrooms":          float(data.get("bathrooms", 1)),
-            "room_type":          float(data.get("room_type", 0)),
-            "host_is_superhost":  float(data.get("host_is_superhost", 0)),
-            "host_response_time": float(data.get("host_response_time", 0)),
-        }
-        row.update(user_map)
+@app.route("/predict/social", methods=["POST"])
+def predict_social():
+    try:
+        d = request.get_json()
+        pred, proba, feats = _predict(social_model, social_scaler, SOCIAL_FEATURES, SOCIAL_MEDS, d)
+        pct   = round(proba * 100, 1)
+        label = "High Performance — Likely to Drive Leads" if pred == 1 else "Low Performance — Low Lead Potential"
+        color = "#22c55e" if pred == 1 else "#f59e0b"
+        return jsonify({"prediction": pred, "label": label, "color": color,
+                        "probability": pct, "top_features": feats})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
 
-        # Build DataFrame in correct column order
-        X = pd.DataFrame([row])[FEATURE_COLS]
 
-        # Scale
-        X_scaled = scaler.transform(X)
-
-        # Predict
-        pred  = int(model.predict(X_scaled)[0])
-        proba = float(model.predict_proba(X_scaled)[0][1])
-
-        label   = "High Churn Risk" if pred == 1 else "Low Churn Risk"
-        color   = "#ef4444" if pred == 1 else "#22c55e"
-        pct     = round(proba * 100, 1)
-
-        # Key factors (top feature importances)
-        importances = model.feature_importances_
-        top_idx     = np.argsort(importances)[::-1][:5]
-        top_features = [
-            {"feature": FEATURE_COLS[i].replace("_", " ").title(), "importance": round(float(importances[i]), 4)}
-            for i in top_idx
-        ]
-
-        return jsonify({
-            "prediction": pred,
-            "label": label,
-            "color": color,
-            "probability": pct,
-            "top_features": top_features,
-        })
-
+@app.route("/predict/listing", methods=["POST"])
+def predict_listing():
+    try:
+        d = request.get_json()
+        pred, proba, feats = _predict(listing_model, listing_scaler, LISTING_FEATURES, LISTING_MEDS, d)
+        pct   = round(proba * 100, 1)
+        label = "Likely to Sell" if pred == 1 else "At Risk of Not Selling"
+        color = "#22c55e" if pred == 1 else "#ef4444"
+        return jsonify({"prediction": pred, "label": label, "color": color,
+                        "probability": pct, "top_features": feats})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
 
 @app.route("/models")
 def models_page():
-    return render_template("models.html", results=MODEL_RESULTS)
+    return render_template("models.html", results=ALL_MODEL_RESULTS)
 
 
 @app.route("/about")
 def about():
-    return render_template("about.html", datasets=DATASETS)
+    datasets = [
+        {"name": "Real Estate Analytics + Churn",   "ref": "real-estate-analytics-revenue-behavior-and-churn", "rows": "~285k",  "note": "Primary — churn labels, listings, transactions"},
+        {"name": "US Airbnb Open Data 2020/2023",    "ref": "us-airbnb-open-data",                              "rows": "459,667","note": "Host behaviour over time"},
+        {"name": "Instagram Analytics Dataset",      "ref": "instagram-analytics-dataset",                      "rows": "30,000", "note": "Social media content performance"},
+        {"name": "Social Media Performance",         "ref": "social-media-performance-and-engagement-data",     "rows": "10,000", "note": "Cross-platform engagement signals"},
+        {"name": "Georgia Real Estate 2026",         "ref": "georgia-real-estate-rentals-intelligence-2026",    "rows": "~5k",    "note": "Recent rental market data"},
+        {"name": "Sydney Airbnb Short-Term Rentals", "ref": "airbnb-short-term-rental-data-sydney",             "rows": "~10k",   "note": "International rental benchmark"},
+    ]
+    return render_template("about.html", datasets=datasets)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,65 @@
+{
+  "LogisticRegression": {
+    "accuracy": 0.5007,
+    "precision": 0.5007,
+    "recall": 0.5103,
+    "f1": 0.5054,
+    "roc_auc": 0.5034
+  },
+  "DecisionTree": {
+    "accuracy": 0.4962,
+    "precision": 0.4962,
+    "recall": 0.5057,
+    "f1": 0.5009,
+    "roc_auc": 0.4962
+  },
+  "RandomForest": {
+    "accuracy": 0.4983,
+    "precision": 0.4983,
+    "recall": 0.495,
+    "f1": 0.4967,
+    "roc_auc": 0.4999
+  },
+  "GradientBoosting": {
+    "accuracy": 0.497,
+    "precision": 0.4971,
+    "recall": 0.5077,
+    "f1": 0.5023,
+    "roc_auc": 0.4995
+  },
+  "XGBoost": {
+    "accuracy": 0.491,
+    "precision": 0.4911,
+    "recall": 0.499,
+    "f1": 0.495,
+    "roc_auc": 0.4921
+  },
+  "KNN": {
+    "accuracy": 0.498,
+    "precision": 0.4981,
+    "recall": 0.5117,
+    "f1": 0.5048,
+    "roc_auc": 0.4994
+  },
+  "GaussianNB": {
+    "accuracy": 0.504,
+    "precision": 0.5038,
+    "recall": 0.533,
+    "f1": 0.518,
+    "roc_auc": 0.5001
+  },
+  "AdaBoost": {
+    "accuracy": 0.4923,
+    "precision": 0.4926,
+    "recall": 0.5093,
+    "f1": 0.5008,
+    "roc_auc": 0.4905
+  },
+  "SVC": {
+    "accuracy": 0.4962,
+    "precision": 0.4965,
+    "recall": 0.541,
+    "f1": 0.5178,
+    "roc_auc": 0.5072
+  }
+}

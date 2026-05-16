@@ -1,0 +1,2 @@
+propensity_score,segment_enc,acquisition_enc,income_enc,age,household_size,avg_calls,avg_views,avg_visits,avg_sessions,avg_session_min,avg_engagement,avg_churn_risk,avg_revenue,total_deals,months_active
+0.588,1.0,4.0,3.0,39.0,6.0,0.0,0.2,0.05,0.55,2.8975,0.048897499999999997,0.175875,0.0,0.0,20.0

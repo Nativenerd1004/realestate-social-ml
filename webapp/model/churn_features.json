@@ -1,0 +1,1 @@
+["propensity_score", "segment_enc", "acquisition_enc", "income_enc", "age", "household_size", "avg_calls", "avg_views", "avg_visits", "avg_sessions", "avg_session_min", "avg_engagement", "avg_churn_risk", "avg_revenue", "total_deals", "months_active"]

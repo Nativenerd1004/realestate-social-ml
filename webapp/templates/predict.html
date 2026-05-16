@@ -1,155 +1,449 @@
 {% extends "base.html" %}
-{% block title %}Predict Churn — RealEstate ML{% endblock %}
+{% block title %}Predict — RealEstate ML{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h1>Host Churn Predictor</h1>
-  <p>Enter listing details below — our Random Forest model (ROC-AUC: 0.85) predicts whether a host is at risk of becoming inactive.</p>
+  <h1>AI Prediction Suite</h1>
+  <p>Three prediction tools powered by separate ML models trained on 300k+ real-world records.</p>
 </div>
 
-<div class="predict-layout">
-  <!-- Input Form -->
-  <div class="predict-form-card">
-    <h2 class="card-title">Listing Details</h2>
-    <form id="predict-form">
+<!-- ── Tab Selector ─────────────────────────────────────────────────────── -->
+<div class="predict-tabs">
+  <button class="ptab-btn active" onclick="switchTab('churn', this)">
+    <span class="ptab-icon">👤</span> Host Churn Predictor
+  </button>
+  <button class="ptab-btn" onclick="switchTab('social', this)">
+    <span class="ptab-icon">📱</span> Social Media Performance
+  </button>
+  <button class="ptab-btn" onclick="switchTab('listing', this)">
+    <span class="ptab-icon">🏠</span> Listing Sale Predictor
+  </button>
+</div>
 
-      <div class="form-section">
-        <div class="form-section-title">💰 Pricing &amp; Availability</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Price per Night ($)</label>
-            <input type="number" id="price" value="155" min="5" max="5000" step="1"/>
-            <span class="form-hint">Median: $155</span>
-          </div>
-          <div class="form-group">
-            <label>Availability (days/year)</label>
-            <input type="range" id="availability_365" value="202" min="0" max="365" step="1"
-                   oninput="document.getElementById('avail-val').textContent=this.value"/>
-            <span class="range-val"><span id="avail-val">202</span> days</span>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Minimum Nights Required</label>
-            <input type="number" id="minimum_nights" value="14" min="1" max="365" step="1"/>
-          </div>
-          <div class="form-group">
-            <label>Room Type</label>
-            <select id="room_type">
-              <option value="0">Entire Home / Apt</option>
-              <option value="1">Private Room</option>
-              <option value="2">Shared Room</option>
-              <option value="3">Hotel Room</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-title">⭐ Reviews &amp; Ratings</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Number of Reviews</label>
-            <input type="number" id="number_of_reviews" value="6" min="0" max="3000" step="1"/>
-          </div>
-          <div class="form-group">
-            <label>Review Score Rating</label>
-            <input type="range" id="review_scores_rating" value="4.9" min="0" max="5" step="0.1"
-                   oninput="document.getElementById('rating-val').textContent=this.value"/>
-            <span class="range-val"><span id="rating-val">4.9</span> / 5.0</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-title">🏡 Property Details</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Accommodates (guests)</label>
-            <input type="number" id="accommodates" value="3" min="1" max="16" step="1"/>
-          </div>
-          <div class="form-group">
-            <label>Bedrooms</label>
-            <input type="number" id="bedrooms" value="1" min="0" max="10" step="1"/>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Beds</label>
-            <input type="number" id="beds" value="2" min="0" max="20" step="1"/>
-          </div>
-          <div class="form-group">
-            <label>Bathrooms</label>
-            <input type="number" id="bathrooms" value="1" min="0" max="10" step="0.5"/>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section-title">👤 Host Profile</div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Host Response Rate (%)</label>
-            <input type="range" id="host_response_rate" value="100" min="0" max="100" step="1"
-                   oninput="document.getElementById('resp-val').textContent=this.value"/>
-            <span class="range-val"><span id="resp-val">100</span>%</span>
-          </div>
-          <div class="form-group">
-            <label>Host Response Time</label>
-            <select id="host_response_time">
-              <option value="3">Within an hour</option>
-              <option value="2">Within a few hours</option>
-              <option value="1">Within a day</option>
-              <option value="0">A few days or more</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Superhost Status</label>
-            <select id="host_is_superhost">
-              <option value="0">Not a Superhost</option>
-              <option value="1">Superhost ⭐</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-primary btn-full">
-        <span id="btn-text">Run Prediction →</span>
-      </button>
-    </form>
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 1: HOST CHURN PREDICTOR                                            -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="tab-churn" class="predict-tab-content active">
+  <div class="tab-intro">
+    <div class="tab-badge churn-badge">Real Estate Churn Model</div>
+    <p class="tab-desc">Given a client's profile and engagement history, predict whether they are at risk of going inactive or leaving the platform.</p>
   </div>
+  <div class="predict-layout">
+    <div class="predict-form-card">
+      <h2 class="card-title">Client Profile</h2>
+      <form id="churn-form">
 
-  <!-- Result Panel -->
-  <div class="predict-result-card" id="result-panel" style="display:none;">
-    <h2 class="card-title">Prediction Result</h2>
+        <div class="form-section">
+          <div class="form-section-title">👤 Client Demographics</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Client Segment</label>
+              <select id="c-segment_enc">
+                {% for i, seg in enumerate(churn_enc['segments']) %}
+                <option value="{{ i }}">{{ seg }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Acquisition Channel</label>
+              <select id="c-acquisition_enc">
+                {% for i, ch in enumerate(churn_enc['channels']) %}
+                <option value="{{ i }}">{{ ch }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Income Band</label>
+              <select id="c-income_enc">
+                {% for i, ib in enumerate(churn_enc['income_bands']) %}
+                <option value="{{ i }}">{{ ib }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Age</label>
+              <input type="number" id="c-age" value="35" min="18" max="80"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Household Size</label>
+              <input type="number" id="c-household_size" value="3" min="1" max="10"/>
+            </div>
+            <div class="form-group">
+              <label>Propensity Score (0–1)</label>
+              <input type="range" id="c-propensity_score" value="0.55" min="0" max="1" step="0.01"
+                     oninput="document.getElementById('prop-val').textContent=this.value"/>
+              <span class="range-val"><span id="prop-val">0.55</span></span>
+            </div>
+          </div>
+        </div>
 
-    <div class="gauge-container">
-      <div class="gauge-ring" id="gauge-ring">
-        <div class="gauge-inner">
-          <div class="gauge-pct" id="gauge-pct">—</div>
-          <div class="gauge-lbl">Churn Risk</div>
+        <div class="form-section">
+          <div class="form-section-title">📊 Monthly Activity (Averages)</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Avg Monthly Calls</label>
+              <input type="number" id="c-avg_calls" value="0" min="0" max="50" step="0.1"/>
+            </div>
+            <div class="form-group">
+              <label>Avg Monthly Views</label>
+              <input type="number" id="c-avg_views" value="10" min="0" max="1000"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Avg Monthly Visits</label>
+              <input type="number" id="c-avg_visits" value="5" min="0" max="200"/>
+            </div>
+            <div class="form-group">
+              <label>Avg Monthly Sessions</label>
+              <input type="number" id="c-avg_sessions" value="8" min="0" max="300"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Avg Session Length (min)</label>
+              <input type="number" id="c-avg_session_min" value="5" min="0" max="120" step="0.5"/>
+            </div>
+            <div class="form-group">
+              <label>Engagement Score (0–1)</label>
+              <input type="range" id="c-avg_engagement" value="0.35" min="0" max="1" step="0.01"
+                     oninput="document.getElementById('eng-val').textContent=this.value"/>
+              <span class="range-val"><span id="eng-val">0.35</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">📈 Revenue & Risk</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Churn Risk Score (0–1)</label>
+              <input type="range" id="c-avg_churn_risk" value="0.3" min="0" max="1" step="0.01"
+                     oninput="document.getElementById('risk-val').textContent=this.value"/>
+              <span class="range-val"><span id="risk-val">0.3</span></span>
+            </div>
+            <div class="form-group">
+              <label>Avg Monthly Revenue ($)</label>
+              <input type="number" id="c-avg_revenue" value="0" min="0" max="500000"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Total Deals Closed</label>
+              <input type="number" id="c-total_deals" value="0" min="0" max="100"/>
+            </div>
+            <div class="form-group">
+              <label>Months Active</label>
+              <input type="number" id="c-months_active" value="12" min="1" max="60"/>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">
+          <span id="churn-btn-text">Predict Churn Risk →</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="predict-result-card" id="churn-result" style="display:none;">
+      <h2 class="card-title">Churn Risk Result</h2>
+      <div class="gauge-container">
+        <div class="gauge-ring" id="churn-gauge-ring">
+          <div class="gauge-inner">
+            <div class="gauge-pct" id="churn-gauge-pct">—</div>
+            <div class="gauge-lbl">Churn Risk</div>
+          </div>
         </div>
       </div>
+      <div class="result-label" id="churn-label">—</div>
+      <div class="result-bar-wrap"><div class="result-bar" id="churn-bar"></div></div>
+      <div class="top-features">
+        <div class="feat-title">Top Driving Factors</div>
+        <div id="churn-feats"></div>
+      </div>
+      <div class="result-note" id="churn-model-note">Model: Loading...</div>
+      <button class="btn btn-outline btn-full" onclick="resetResult('churn')">← Try Another</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 2: SOCIAL MEDIA PERFORMANCE PREDICTOR                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="tab-social" class="predict-tab-content">
+  <div class="tab-intro">
+    <div class="tab-badge social-badge">Social Media Model</div>
+    <p class="tab-desc">Enter your content parameters — the model predicts whether your post will achieve <strong>high engagement</strong>, which translates to more reach, leads, and inbound calls for real estate listings.</p>
+  </div>
+  <div class="predict-layout">
+    <div class="predict-form-card">
+      <h2 class="card-title">Content Details</h2>
+      <form id="social-form">
+
+        <div class="form-section">
+          <div class="form-section-title">📱 Account & Platform</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Account Type</label>
+              <select id="s-account_type_enc">
+                {% for i, at in enumerate(social_enc['account_types']) %}
+                <option value="{{ i }}">{{ at | title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Follower Count</label>
+              <input type="number" id="s-follower_count" value="5000" min="100" max="10000000"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">🎬 Content Type</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Media Type</label>
+              <select id="s-media_type_enc">
+                {% for i, mt in enumerate(social_enc['media_types']) %}
+                <option value="{{ i }}">{{ mt | title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Content Category</label>
+              <select id="s-content_category_enc">
+                {% for i, cc in enumerate(social_enc['content_cats']) %}
+                <option value="{{ i }}">{{ cc }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Traffic Source</label>
+              <select id="s-traffic_source_enc">
+                {% for i, ts in enumerate(social_enc['traffic_sources']) %}
+                <option value="{{ i }}">{{ ts }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Has Call to Action?</label>
+              <select id="s-has_call_to_action">
+                <option value="1">Yes — CTA included</option>
+                <option value="0">No CTA</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">🕐 Timing & Caption</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Day of Week</label>
+              <select id="s-day_enc">
+                {% for i, day in enumerate(social_enc['days']) %}
+                <option value="{{ i }}">{{ day }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Post Hour (0–23)</label>
+              <input type="range" id="s-post_hour" value="10" min="0" max="23" step="1"
+                     oninput="document.getElementById('hour-val').textContent=this.value+':00'"/>
+              <span class="range-val"><span id="hour-val">10:00</span></span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Caption Length (characters)</label>
+              <input type="number" id="s-caption_length" value="150" min="0" max="2200"/>
+            </div>
+            <div class="form-group">
+              <label>Hashtag Count</label>
+              <input type="number" id="s-hashtags_count" value="10" min="0" max="30"/>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="background:#a855f7; color:#fff;">
+          <span id="social-btn-text">Predict Performance →</span>
+        </button>
+      </form>
     </div>
 
-    <div class="result-label" id="result-label">—</div>
-    <div class="result-bar-wrap">
-      <div class="result-bar" id="result-bar"></div>
+    <div class="predict-result-card" id="social-result" style="display:none;">
+      <h2 class="card-title">Performance Prediction</h2>
+      <div class="gauge-container">
+        <div class="gauge-ring" id="social-gauge-ring">
+          <div class="gauge-inner">
+            <div class="gauge-pct" id="social-gauge-pct">—</div>
+            <div class="gauge-lbl">Lead Potential</div>
+          </div>
+        </div>
+      </div>
+      <div class="result-label" id="social-label">—</div>
+      <div class="result-bar-wrap"><div class="result-bar" id="social-bar"></div></div>
+      <div class="top-features">
+        <div class="feat-title">Top Driving Factors</div>
+        <div id="social-feats"></div>
+      </div>
+      <div class="result-note" id="social-model-note">Model: Loading...</div>
+      <button class="btn btn-outline btn-full" onclick="resetResult('social')">← Try Another</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 3: LISTING SALE PREDICTOR                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="tab-listing" class="predict-tab-content">
+  <div class="tab-intro">
+    <div class="tab-badge listing-badge">Listing Performance Model</div>
+    <p class="tab-desc">Enter property and listing details to predict the likelihood of a successful sale. Trained on 8,500 real estate transactions across multiple cities.</p>
+  </div>
+  <div class="predict-layout">
+    <div class="predict-form-card">
+      <h2 class="card-title">Property Details</h2>
+      <form id="listing-form">
+
+        <div class="form-section">
+          <div class="form-section-title">🏗️ Property Specs</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Property Type</label>
+              <select id="l-prop_type_enc">
+                {% for i, pt in enumerate(listing_enc['property_types']) %}
+                <option value="{{ i }}">{{ pt }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Size (sqm)</label>
+              <input type="number" id="l-size_sqm" value="120" min="10" max="2000"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Bedrooms</label>
+              <input type="number" id="l-bedrooms" value="3" min="0" max="20"/>
+            </div>
+            <div class="form-group">
+              <label>Bathrooms</label>
+              <input type="number" id="l-bathrooms" value="2" min="0" max="10"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Year Built</label>
+              <input type="number" id="l-year_built" value="2005" min="1900" max="2025"/>
+            </div>
+            <div class="form-group">
+              <label>Amenities Count</label>
+              <input type="number" id="l-amenities_count" value="5" min="0" max="20"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">📍 Location & Market</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Location Score (0–1)</label>
+              <input type="range" id="l-location_score" value="0.65" min="0" max="1" step="0.01"
+                     oninput="document.getElementById('loc-val').textContent=this.value"/>
+              <span class="range-val"><span id="loc-val">0.65</span></span>
+            </div>
+            <div class="form-group">
+              <label>City</label>
+              <select id="l-city_enc">
+                {% for i, city in enumerate(listing_enc['cities']) %}
+                <option value="{{ i }}">{{ city }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Has Parking?</label>
+              <select id="l-has_parking">
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Near Transit?</label>
+              <select id="l-near_transit">
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Near School?</label>
+              <select id="l-near_school">
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">💰 Pricing & Listing</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Property Value ($)</label>
+              <input type="number" id="l-list_price" value="500000" min="50000" max="50000000"/>
+            </div>
+            <div class="form-group">
+              <label>Listed Price ($)</label>
+              <input type="number" id="l-listed_price" value="480000" min="50000" max="50000000"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Listing Channel</label>
+              <select id="l-list_channel_enc">
+                {% for i, lc in enumerate(listing_enc['list_channels']) %}
+                <option value="{{ i }}">{{ lc }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="background:#22c55e; color:#0d1117;">
+          <span id="listing-btn-text">Predict Sale Likelihood →</span>
+        </button>
+      </form>
     </div>
 
-    <div class="top-features">
-      <div class="feat-title">Top Contributing Factors</div>
-      <div id="feature-list"></div>
+    <div class="predict-result-card" id="listing-result" style="display:none;">
+      <h2 class="card-title">Sale Prediction</h2>
+      <div class="gauge-container">
+        <div class="gauge-ring" id="listing-gauge-ring">
+          <div class="gauge-inner">
+            <div class="gauge-pct" id="listing-gauge-pct">—</div>
+            <div class="gauge-lbl">Sale Probability</div>
+          </div>
+        </div>
+      </div>
+      <div class="result-label" id="listing-label">—</div>
+      <div class="result-bar-wrap"><div class="result-bar" id="listing-bar"></div></div>
+      <div class="top-features">
+        <div class="feat-title">Top Driving Factors</div>
+        <div id="listing-feats"></div>
+      </div>
+      <div class="result-note" id="listing-model-note">Model: Loading...</div>
+      <button class="btn btn-outline btn-full" onclick="resetResult('listing')">← Try Another</button>
     </div>
-
-    <div class="result-note">
-      <strong>Model:</strong> Random Forest Classifier (iter 10) ·
-      <strong>Accuracy:</strong> 84.1% · <strong>ROC-AUC:</strong> 0.85
-    </div>
-
-    <button class="btn btn-outline btn-full" onclick="resetForm()">← Try Another</button>
   </div>
 </div>
 {% endblock %}

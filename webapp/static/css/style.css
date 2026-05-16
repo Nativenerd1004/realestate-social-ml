@@ -203,3 +203,30 @@ select option { background: var(--surface2); }
 .summary-list li::before { content: "✓"; color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 2px; }
 
 .dataset-table code { font-size: 0.75rem; }
+
+/* ─── 3-Tab Predict Selector ───────────────────────────────── */
+.predict-tabs {
+  display: flex; gap: 0.75rem; padding: 2rem 4rem 0; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border); margin-bottom: 0;
+}
+.ptab-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border-radius: 10px 10px 0 0;
+  border: 1px solid var(--border); border-bottom: none;
+  background: var(--surface); color: var(--muted);
+  font-size: 0.95rem; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; position: relative; top: 1px;
+}
+.ptab-btn.active { background: var(--surface2); color: var(--text); border-color: var(--border); border-bottom: 2px solid var(--accent); }
+.ptab-btn:hover:not(.active) { color: var(--text); background: var(--surface2); }
+.ptab-icon { font-size: 1.1rem; }
+
+.predict-tab-content { display: none; }
+.predict-tab-content.active { display: block; }
+
+.tab-intro { padding: 1.5rem 4rem 0; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.tab-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; }
+.churn-badge  { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+.social-badge { background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); }
+.listing-badge{ background: rgba(34,197,94,0.15);  color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+.tab-desc { color: var(--muted); font-size: 0.92rem; flex: 1; min-width: 200px; }
