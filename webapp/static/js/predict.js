@@ -119,6 +119,24 @@ document.getElementById('social-form').addEventListener('submit', async (e) => {
   }, 'social-btn-text', 'Predict Market Position →');
 });
 
+// ── TAB 4: Social Media Performance (YouTube Trending) ───────────────────────
+document.getElementById('yt-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const g   = id => parseFloat(document.getElementById('yt-' + id)?.value ?? 0);
+  const rawViews    = g('views_raw');
+  const commentsPerK = g('comments_per_k');
+  await runPredict('/predict/yt', 'yt', {
+    cat_enc:      g('cat_enc'),
+    country_enc:  g('country_enc'),
+    title_length: g('title_length'),
+    tag_count:    g('tag_count'),
+    publish_hour: g('publish_hour'),
+    publish_dow:  g('publish_dow'),
+    log_views:    Math.log1p(rawViews),
+    comment_rate: commentsPerK / 1000,
+  }, 'yt-btn-text', 'Predict Engagement →');
+});
+
 // ── TAB 3: Listing Sale (Illinois 2026) ──────────────────────────────────────
 document.getElementById('listing-form').addEventListener('submit', async (e) => {
   e.preventDefault();

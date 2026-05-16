@@ -1,6 +1,6 @@
 """
-Real Estate + Social Media ML — 3-Tab Prediction App
-Tabs: Host Churn | Social Media Performance | Listing Sale Predictor
+Real Estate + Social Media ML — 4-Tab Prediction App
+Tabs: Host Churn | Market Position (USA+Canada) | Listing Sale | Social Media
 """
 import json
 import os
@@ -19,7 +19,7 @@ app.jinja_env.globals.update(enumerate=enumerate)
 
 
 def load_model_bundle(name):
-    """Load model, scaler, features, and optional encoder lists for a named bundle."""
+    """Load model, scaler, features, and median reference for a named bundle."""
     m   = joblib.load(MDL / f"{name}_model.pkl")
     sc  = joblib.load(MDL / f"{name}_scaler.pkl")
     ref = pd.read_csv(MDL / f"{name}_X_ref.csv")
@@ -28,10 +28,11 @@ def load_model_bundle(name):
     return m, sc, ft, med
 
 
-# ── Load all three models at startup ──────────────────────────────────────────
+# ── Load all four models at startup ───────────────────────────────────────────
 churn_model,   churn_scaler,   CHURN_FEATURES,   CHURN_MEDS   = load_model_bundle("churn")
 social_model,  social_scaler,  SOCIAL_FEATURES,  SOCIAL_MEDS  = load_model_bundle("social")
 listing_model, listing_scaler, LISTING_FEATURES, LISTING_MEDS = load_model_bundle("listing")
+yt_model,      yt_scaler,      YT_FEATURES,      YT_MEDS      = load_model_bundle("yt")
 
 # ── Encoder label lists ────────────────────────────────────────────────────────
 CHURN_ENC   = {
@@ -47,6 +48,10 @@ LISTING_ENC = {
     "property_types": json.loads((MDL / "listing_types.json").read_text()),
     "sub_types":      json.loads((MDL / "listing_subtypes.json").read_text()),
 }
+YT_ENC = {
+    "categories": json.loads((MDL / "yt_categories.json").read_text()),
+    "countries":  json.loads((MDL / "yt_countries.json").read_text()),
+}
 
 # ── Combined model results for /models page ────────────────────────────────────
 def _load_scores(name, label):
@@ -55,8 +60,9 @@ def _load_scores(name, label):
 
 ALL_MODEL_RESULTS = (
     _load_scores("churn",   "Host Churn") +
-    _load_scores("social",  "Social Media") +
-    _load_scores("listing", "Listing Sale")
+    _load_scores("social",  "Market Position") +
+    _load_scores("listing", "Listing Sale") +
+    _load_scores("yt",      "Social Media")
 )
 
 
@@ -93,7 +99,8 @@ def predict_page():
     return render_template("predict.html",
                            churn_enc=CHURN_ENC,
                            social_enc=SOCIAL_ENC,
-                           listing_enc=LISTING_ENC)
+                           listing_enc=LISTING_ENC,
+                           yt_enc=YT_ENC)
 
 
 @app.route("/predict/churn", methods=["POST"])
@@ -116,7 +123,7 @@ def predict_social():
         d = request.get_json()
         pred, proba, feats = _predict(social_model, social_scaler, SOCIAL_FEATURES, SOCIAL_MEDS, d)
         pct   = round(proba * 100, 1)
-        label = "Above Market — Property Priced Above State Median" if pred == 1 else "Below Market — Property Priced Below State Median"
+        label = "Above Market — Property Priced Above State/Province Median" if pred == 1 else "Below Market — Property Priced Below State/Province Median"
         color = "#a855f7" if pred == 1 else "#f59e0b"
         return jsonify({"prediction": pred, "label": label, "color": color,
                         "probability": pct, "top_features": feats})
@@ -138,6 +145,20 @@ def predict_listing():
         return jsonify({"error": str(e)}), 400
 
 
+@app.route("/predict/yt", methods=["POST"])
+def predict_yt():
+    try:
+        d = request.get_json()
+        pred, proba, feats = _predict(yt_model, yt_scaler, YT_FEATURES, YT_MEDS, d)
+        pct   = round(proba * 100, 1)
+        label = "High Engagement — Content Likely to Drive Above-Average Reach" if pred == 1 else "Low Engagement — Below-Average Performance Expected"
+        color = "#06b6d4" if pred == 1 else "#f59e0b"
+        return jsonify({"prediction": pred, "label": label, "color": color,
+                        "probability": pct, "top_features": feats})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+
 @app.route("/models")
 def models_page():
     return render_template("models.html", results=ALL_MODEL_RESULTS)
@@ -146,12 +167,11 @@ def models_page():
 @app.route("/about")
 def about():
     datasets = [
-        {"name": "Real Estate Analytics + Churn",   "ref": "real-estate-analytics-revenue-behavior-and-churn", "rows": "~285k",  "note": "Primary — churn labels, listings, transactions"},
-        {"name": "US Airbnb Open Data 2020/2023",    "ref": "us-airbnb-open-data",                              "rows": "459,667","note": "Host behaviour over time"},
-        {"name": "USA Real Estate Dataset",            "ref": "ahmedshahriarsakib/usa-real-estate-dataset",         "rows": "1,471,301","note": "Tab 2 — Property market position (above/below state median price)"},
-        {"name": "Illinois Real Estate Sold 2026",   "ref": "kanchana1990/illinois-real-estate-sold-properties-data-2026","rows": "8,574","note": "Tab 3 — Sold-to-list ratio prediction (sold at/above asking price)"},
-        {"name": "Southern States Zillow Data",      "ref": "alaasweed/southern-states-zillow-data",             "rows": "5,904", "note": "Reference market data"},
-        {"name": "King County House Sales",          "ref": "feeldidaxie/king-county-house-sales-usa",           "rows": "22,687","note": "Reference — US house price benchmarks"},
+        {"name": "Real Estate Analytics + Churn",        "ref": "real-estate-analytics-revenue-behavior-and-churn",          "rows": "~285k",     "note": "Tab 1 — Churn labels, listings, transactions"},
+        {"name": "USA Real Estate Dataset",               "ref": "ahmedshahriarsakib/usa-real-estate-dataset",                "rows": "1,471,301", "note": "Tab 2 — US property market position (above/below state median)"},
+        {"name": "Canadian House Prices — Top 45 Cities", "ref": "jeremylarcher/canadian-house-prices-for-top-cities",        "rows": "35,768",    "note": "Tab 2 — Canadian property market position (9 provinces)"},
+        {"name": "Illinois Real Estate Sold 2026",        "ref": "kanchana1990/illinois-real-estate-sold-properties-data-2026","rows": "8,574",    "note": "Tab 3 — Sold-to-list ratio prediction"},
+        {"name": "YouTube Trending Videos Stats 2026",    "ref": "bsthere/youtube-trending-videos-stats-2026",                "rows": "178,399",   "note": "Tab 4 — Social media content engagement prediction"},
     ]
     return render_template("about.html", datasets=datasets)
 

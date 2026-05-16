@@ -18,6 +18,9 @@
   <button class="ptab-btn" onclick="switchTab('listing', this)">
     <span class="ptab-icon">🏠</span> Listing Sale Predictor
   </button>
+  <button class="ptab-btn" onclick="switchTab('yt', this)">
+    <span class="ptab-icon">📱</span> Social Media Performance
+  </button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -384,6 +387,119 @@
     </div>
   </div>
 </div>
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 4: SOCIAL MEDIA PERFORMANCE PREDICTOR                              -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div id="tab-yt" class="predict-tab-content">
+  <div class="tab-intro">
+    <div class="tab-badge" style="background:rgba(6,182,212,0.15);color:#06b6d4;border:1px solid rgba(6,182,212,0.3)">Social Media Model</div>
+    <p class="tab-desc">Enter your content strategy to predict whether your social media post will achieve <strong>above-average engagement</strong>. Trained on 178,399 real YouTube trending videos across 11 countries.</p>
+  </div>
+  <div class="predict-layout">
+    <div class="predict-form-card">
+      <h2 class="card-title">Content Strategy</h2>
+      <form id="yt-form">
+
+        <div class="form-section">
+          <div class="form-section-title">🎬 Content Type & Market</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Content Category</label>
+              <select id="yt-cat_enc">
+                {% for i, cat in enumerate(yt_enc['categories']) %}
+                <option value="{{ i }}">{{ cat }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Target Market / Country</label>
+              <select id="yt-country_enc">
+                {% for i, ct in enumerate(yt_enc['countries']) %}
+                <option value="{{ i }}">{{ ct }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">🕐 Post Timing</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Hour of Day (0 = midnight, 12 = noon)</label>
+              <input type="number" id="yt-publish_hour" value="18" min="0" max="23"/>
+            </div>
+            <div class="form-group">
+              <label>Day of Week</label>
+              <select id="yt-publish_dow">
+                <option value="0">Monday</option>
+                <option value="1">Tuesday</option>
+                <option value="2">Wednesday</option>
+                <option value="3">Thursday</option>
+                <option value="4">Friday</option>
+                <option value="5">Saturday</option>
+                <option value="6">Sunday</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">✍️ Content Details</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Title / Caption Length (characters)</label>
+              <input type="number" id="yt-title_length" value="60" min="1" max="200"/>
+            </div>
+            <div class="form-group">
+              <label>Number of Hashtags / Tags</label>
+              <input type="number" id="yt-tag_count" value="8" min="0" max="50"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">📊 Expected Reach</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Expected Views / Reach</label>
+              <input type="number" id="yt-views_raw" value="50000" min="100" max="100000000"/>
+            </div>
+            <div class="form-group">
+              <label>Expected Comments per 1,000 Views</label>
+              <input type="number" id="yt-comments_per_k" value="1" min="0" max="100" step="0.1"/>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full" style="background:#06b6d4; color:#0d1117;">
+          <span id="yt-btn-text">Predict Engagement →</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="predict-result-card" id="yt-result" style="display:none;">
+      <h2 class="card-title">Engagement Prediction</h2>
+      <div class="gauge-container">
+        <div class="gauge-ring" id="yt-gauge-ring">
+          <div class="gauge-inner">
+            <div class="gauge-pct" id="yt-gauge-pct">—</div>
+            <div class="gauge-lbl">Engagement</div>
+          </div>
+        </div>
+      </div>
+      <div class="result-label" id="yt-label">—</div>
+      <div class="result-bar-wrap"><div class="result-bar" id="yt-bar"></div></div>
+      <div class="top-features">
+        <div class="feat-title">Top Driving Factors</div>
+        <div id="yt-feats"></div>
+      </div>
+      <div class="result-note" id="yt-model-note">Model: Loading...</div>
+      <button class="btn btn-outline btn-full" onclick="resetResult('yt')">← Try Another</button>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}

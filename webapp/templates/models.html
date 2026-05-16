@@ -4,16 +4,17 @@
 {% block content %}
 <div class="page-header">
   <h1>Model Comparison</h1>
-  <p>All 9 classifiers trained independently across 3 prediction targets — SMOTE-balanced classes, best model selected per F1 score.</p>
+  <p>All 8 classifiers trained independently across 4 prediction targets — best model selected per F1 score.</p>
 </div>
 
-{% set tabs_order = ['Host Churn', 'Social Media', 'Listing Sale'] %}
-{% set tab_colors = {'Host Churn': '#ef4444', 'Social Media': '#a855f7', 'Listing Sale': '#22c55e'} %}
+{% set tabs_order = ['Host Churn', 'Market Position', 'Listing Sale', 'Social Media'] %}
+{% set tab_colors = {'Host Churn': '#ef4444', 'Market Position': '#a855f7', 'Listing Sale': '#22c55e', 'Social Media': '#06b6d4'} %}
 
 <div class="chart-tabs" style="padding:1.5rem 4rem 0">
-  <button class="tab-btn active" onclick="showModels('churn', this)">👤 Host Churn</button>
-  <button class="tab-btn" onclick="showModels('social', this)">📊 Market Position</button>
+  <button class="tab-btn active" onclick="showModels('host', this)">👤 Host Churn</button>
+  <button class="tab-btn" onclick="showModels('market', this)">📊 Market Position</button>
   <button class="tab-btn" onclick="showModels('listing', this)">🏠 Listing Sale</button>
+  <button class="tab-btn" onclick="showModels('social', this)">📱 Social Media</button>
 </div>
 
 {% for tab_name in tabs_order %}
@@ -57,15 +58,15 @@
 <div class="model-notes">
   <div class="note-card">
     <h3>SMOTE for Class Imbalance</h3>
-    <p>The Host Churn target had only 2.85% positive class — severely skewed. Synthetic Minority Oversampling (SMOTE) was applied before training to balance classes, directly addressing the F1 plateau from the previous iteration that sat at 0.59.</p>
+    <p>The Host Churn target had only 2.85% positive class — severely skewed. Synthetic Minority Oversampling (SMOTE) was applied before training to balance classes, improving F1 from 0.59 to 0.77.</p>
   </div>
   <div class="note-card">
-    <h3>3 Independent Models</h3>
-    <p>Each prediction tab uses a separately trained model, scaler, and feature set. No shared weights — Host Churn, Social Media Performance, and Listing Sale are fully independent pipelines tailored to their dataset's structure.</p>
+    <h3>4 Independent Models</h3>
+    <p>Each tab uses a separately trained model, scaler, and feature set. Host Churn (285k CRM rows), Market Position (235k US+Canada listings), Listing Sale (8,574 Illinois sales), Social Media (178k YouTube trending videos).</p>
   </div>
   <div class="note-card">
-    <h3>Why RandomForest Dominates</h3>
-    <p>Random Forest consistently outperforms across all 3 targets due to its ensemble averaging, robustness to feature scale (even after MinMaxScaler), and natural handling of mixed categorical + continuous features without needing further preprocessing.</p>
+    <h3>Why XGBoost Dominates</h3>
+    <p>XGBoost wins 3 of 4 tabs — gradient boosting handles mixed feature types, missing values natively, and finds non-linear patterns that single trees and linear models miss. The Social Media tab hits F1=0.88 and ROC=0.95.</p>
   </div>
 </div>
 {% endblock %}
